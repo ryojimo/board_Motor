@@ -69,10 +69,7 @@ static void         Run_Sensors( void );
 static void         Run_I2cLcd( char* str );
 static void         Run_Led( char* str );
 static void         Run_MotorSV( char* str );
-static void         Run_Relay( char* str );
 
-static void         Run_Sa_Acc( char* str );
-static void         Run_Sa_Gyro( char* str );
 static void         Run_Sa_Pm( char* str );
 
 static void         Run_Si_BME280( char* str );
@@ -108,18 +105,6 @@ Run_Help(
     printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
     printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
-    printf( " -r, --relay [OPTION]      : Control the Relay circuit.                     \n\r" );
-    printf( "                        on : ON  relay switch.                              \n\r" );
-    printf( "                       off : OFF relay switch.                              \n\r" );
-    printf( " -a, --sa_acc [OPTION]     : Get the value of a sensor(A/D), Acc.           \n\r" );
-    printf( "                         x : X direction.                                   \n\r" );
-    printf( "                         y : Y direction.                                   \n\r" );
-    printf( "                         z : Z direction.                                   \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -g, --sa_gyro [OPTION]    : Get the value of a sensor(A/D), Gyro .         \n\r" );
-    printf( "                        g1 : G1 direction.                                  \n\r" );
-    printf( "                        g2 : G2 direction.                                  \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
     printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
     printf( "                      json : value of json format.                          \n\r" );
     printf( " -w, --si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
@@ -178,13 +163,6 @@ static void
 Run_Sensors(
     void  ///< [in] ナシ
 ){
-    SHalSensor_t*   dataSaAccX;
-    SHalSensor_t*   dataSaAccY;
-    SHalSensor_t*   dataSaAccZ;
-
-    SHalSensor_t*   dataSaGyroG1;
-    SHalSensor_t*   dataSaGyroG2;
-
     SHalSensor_t*   dataSiBme280Atmos;
     SHalSensor_t*   dataSiBme280Humi;
     SHalSensor_t*   dataSiBme280Temp;
@@ -197,13 +175,6 @@ Run_Sensors(
     SHalSensor_t*   dataSiTsl2561;
 
     DBG_PRINT_TRACE( "\n\r" );
-
-    dataSaAccX   = HalSensorAcc_Get( EN_SEN_ACC_X );
-    dataSaAccY   = HalSensorAcc_Get( EN_SEN_ACC_Y );
-    dataSaAccZ   = HalSensorAcc_Get( EN_SEN_ACC_Z );
-
-    dataSaGyroG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-    dataSaGyroG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
 
     dataSiBme280Atmos = HalSensorBME280_Get( EN_SEN_BME280_ATMOS );
     dataSiBme280Humi  = HalSensorBME280_Get( EN_SEN_BME280_HUMI );
@@ -218,13 +189,6 @@ Run_Sensors(
 
     // node.js サーバへデータを渡すための printf()
     printf( "{ " );
-    printf( "\"sa_acc_x\"       :%d,    ", (int)dataSaAccX->cur );
-    printf( "\"sa_acc_y\"       :%d,    ", (int)dataSaAccY->cur );
-    printf( "\"sa_acc_z\"       :%d,    ", (int)dataSaAccZ->cur );
-
-    printf( "\"sa_gyro_g1\"     :%d,    ", (int)dataSaGyroG1->cur );
-    printf( "\"sa_gyro_g2\"     :%d,    ", (int)dataSaGyroG2->cur );
-
     printf( "\"si_bme280_atmos\":%5.2f, ", dataSiBme280Atmos->cur );
     printf( "\"si_bme280_humi\" :%5.2f, ", dataSiBme280Humi->cur );
     printf( "\"si_bme280_temp\" :%5.2f, ", dataSiBme280Temp->cur );
@@ -306,155 +270,6 @@ Run_MotorSV(
     HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
 //  usleep( 1000 * 1000 );  // 2s 待つ
 
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     リレーを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Relay(
-    char*  str     ///< [in] 文字列
-){
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "on", strlen("on") ) )
-    {
-        HalRelay_Set( EN_HIGH );
-    } else if( 0 == strncmp( str, "off", strlen("off") ) )
-    {
-        HalRelay_Set( EN_LOW );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-    }
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     加速度センサを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Sa_Acc(
-    char*           str     ///< [in] 文字列
-){
-    SHalSensor_t*   data;
-    SHalSensor_t*   dataX;
-    SHalSensor_t*   dataY;
-    SHalSensor_t*   dataZ;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "x", strlen("x") ) )
-    {
-        data = HalSensorAcc_Get( EN_SEN_ACC_X );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
-        printf( "%d", (int)data->cur );
-    } else if( 0 == strncmp( str, "y", strlen("y") ) )
-    {
-        data = HalSensorAcc_Get( EN_SEN_ACC_Y );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
-        printf( "%d", (int)data->cur );
-    } else if( 0 == strncmp( str, "z", strlen("z") ) )
-    {
-        data = HalSensorAcc_Get( EN_SEN_ACC_Z );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
-        printf( "%d", (int)data->cur );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        dataX = HalSensorAcc_Get( EN_SEN_ACC_X );
-        dataY = HalSensorAcc_Get( EN_SEN_ACC_Y );
-        dataZ = HalSensorAcc_Get( EN_SEN_ACC_Z );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
-
-        printf( "{ " );
-        printf( "  \"sensor\": \"sa_acc\"," );
-        printf( "  \"value\": {" );
-        printf( "    \"x\": %d,", (int)dataX->cur );
-        printf( "    \"y\": %d,", (int)dataY->cur );
-        printf( "    \"z\": %d ", (int)dataZ->cur );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     ジャイロセンサを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Sa_Gyro(
-    char*               str     ///< [in] 文字列
-){
-    SHalSensor_t*       data;
-    SHalSensor_t*       dataG1;
-    SHalSensor_t*       dataG2;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "g1", strlen("g1") ) )
-    {
-        data = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%4X", (int)data->cur );
-        printf( "%d", (int)data->cur );
-    } else if( 0 == strncmp( str, "g2", strlen("g2") ) )
-    {
-        data = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%4X", (int)data->cur );
-        printf( "%d", (int)data->cur );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        dataG1 = HalSensorGyro_Get( EN_SEN_GYRO_G1 );
-        dataG2 = HalSensorGyro_Get( EN_SEN_GYRO_G2 );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%04X, %04X", (int)dataG1->cur, (int)dataG2->cur );
-
-        printf( "{ " );
-        printf( "  \"sensor\": \"sa_gyro\"," );
-        printf( "  \"value\": {" );
-        printf( "    \"g1\": %d,", (int)dataG1->cur );
-        printf( "    \"g2\": %d ", (int)dataG2->cur );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
     return;
 }
 
@@ -807,7 +622,7 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "mhsc:l:o:r:a:g:p::w:x::y:z:t::i:u:";
+    const char      optstring[] = "mhsc:l:o:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "menu",        no_argument,       NULL,  'm' },
@@ -816,9 +631,6 @@ int main(int argc, char *argv[ ])
         { "i2clcd",      required_argument, NULL,  'c' },
         { "led",         required_argument, NULL,  'l' },
         { "motorsv",     required_argument, NULL,  'o' },
-        { "relay",       required_argument, NULL,  'r' },
-        { "sa_acc",      required_argument, NULL,  'a' },
-        { "sa_gyro",     required_argument, NULL,  'g' },
         { "sa_pm",       optional_argument, NULL,  'p' },
         { "si_bme280",   required_argument, NULL,  'w' },
         { "si_gp2y0e03", optional_argument, NULL,  'x' },
@@ -891,9 +703,6 @@ int main(int argc, char *argv[ ])
         case 'c': Run_I2cLcd( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'o': Run_MotorSV( optarg ); break;
-        case 'r': Run_Relay( optarg ); break;
-        case 'a': Run_Sa_Acc( optarg ); break;
-        case 'g': Run_Sa_Gyro( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
         case 'w': Run_Si_BME280( optarg ); break;
         case 'x': Run_Si_GP2Y0E03( optarg ); break;

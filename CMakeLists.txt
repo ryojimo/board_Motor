@@ -2,7 +2,7 @@ cmake_minimum_required( VERSION 3.7.2 )
 
 # Set project information
 project( board_Sensor VERSION 0.0.1 LANGUAGES C )
-set( PROJECT_BRIEF "A sensor system on RaspberryPi." )
+set( PROJECT_BRIEF "A motor system on RaspberryPi." )
 
 # Options
 set( CMAKE_C_FLAGS "-v -O2 -Wall" )

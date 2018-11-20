@@ -84,11 +84,8 @@ Sys_Init(
     HalLed_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
-    HalRelay_Init();
 
     // SENSOR (ADC)
-    HalSensorAcc_Init();
-    HalSensorGyro_Init();
     HalSensorPm_Init();
 
     // SENSOR (I2C)
@@ -122,11 +119,8 @@ Sys_Fini(
     HalLed_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
-    HalRelay_Fini();
 
     // SENSOR (ADC)
-    HalSensorAcc_Fini();
-    HalSensorGyro_Fini();
     HalSensorPm_Fini();
 
     // SENSOR (I2C)
@@ -165,7 +159,7 @@ Sys_ShowInfo(
     AppIfLcd_Ctrl( 1, 0, 0 );
 
     AppIfLcd_CursorSet( 0, 0 );
-    AppIfLcd_Printf( "RP3 BOARD SENSOR" );
+    AppIfLcd_Printf( "RP3 BOARD MOTOR" );
     usleep( 2000 * 1000 );  // 2sec 表示
 
     AppIfLcd_CursorSet( 0, 1 );
@@ -196,7 +190,7 @@ Sys_ShowInfo(
     AppIfPc_Printf( "\n\r" );
     AppIfPc_Printf( "================================ \n\r" );
 
-    AppIfPc_Puts( "RP3 BOARD SENSOR\n\r" );
+    AppIfPc_Puts( "RP3 BOARD MOTOR\n\r" );
 
     AppIfPc_Puts( "Launch .... \n\r" );
     AppIfPc_Puts( "\n\r" );
