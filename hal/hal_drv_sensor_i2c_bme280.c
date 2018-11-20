@@ -6,6 +6,7 @@
  *  @sa             none.
  *  @note           https://github.com/BoschSensortec/BME280_driver
  *                  https://www.switch-science.com/catalog/2323/
+ *                  https://github.com/ControlEverythingCommunity/BME280
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
