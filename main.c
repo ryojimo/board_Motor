@@ -68,6 +68,8 @@ static void         Run_Sensors( void );
 
 static void         Run_I2cLcd( char* str );
 static void         Run_Led( char* str );
+static void         Run_MotorDC( char* str );
+static void         Run_MotorST( char* str );
 static void         Run_MotorSV( char* str );
 
 static void         Run_Sa_Pm( char* str );
@@ -103,10 +105,15 @@ Run_Help(
     printf( " -s, --sensors             : Get the value of all sensors.                  \n\r" );
     printf( "                                                                            \n\r" );
     printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( "                                                                            \n\r" );
+    printf( " -d, --motordc <value>     : Control the DC motor.                          \n\r" );
+    printf( " -e, --motorst <value>     : Control the STEPPING motor.                    \n\r" );
+    printf( " -f, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
+    printf( "                                                                            \n\r" );
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
-    printf( " -o, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
     printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
     printf( "                      json : value of json format.                          \n\r" );
+    printf( "                                                                            \n\r" );
     printf( " -w, --si_bme280 [OPTION]  : Get the value of a sensor(I2C), BME280.        \n\r" );
     printf( "                     atmos : atmosphere                                     \n\r" );
     printf( "                      humi : humidity                                       \n\r" );
@@ -118,7 +125,7 @@ Run_Help(
     printf( "                     atmos : atmosphere                                     \n\r" );
     printf( "                      temp : temperature                                    \n\r" );
     printf( "                      json : all values of json format.                     \n\r" );
-    printf( " -x, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
+    printf( " -z, --si_tsl2561 [OPTION] : Get the value of a sensor(I2C), TSL2561.       \n\r" );
     printf( "                 broadband : ?                                              \n\r" );
     printf( "                        ir : ?                                              \n\r" );
     printf( "                       lux : lux                                            \n\r" );
@@ -244,6 +251,57 @@ Run_Led(
 
     sscanf( str, "%X", &num );
     HalLed_Set( num );
+
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     DC MOTOR を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_MotorDC(
+    char*   str     ///< [in] 文字列
+){
+    int     data = 0;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    data = atoi( (const char*)str );
+    DBG_PRINT_TRACE( "data = %d \n", data );
+    HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
+//  usleep( 1000 * 1000 );  // 2s 待つ
+
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     STEPPING MOTOR を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_MotorST(
+    char*   str     ///< [in] 文字列
+){
+    int     data = 0;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    data = atoi( (const char*)str );
+    DBG_PRINT_TRACE( "data = %d \n", data );
+
+    HalMotorST_SetStatus( EN_MOTOR_CW );
+//  usleep( 1000 * 1000 );  // 2s 待つ
 
     return;
 }
@@ -622,15 +680,17 @@ int main(int argc, char *argv[ ])
     unsigned char*  pt;
 
     int             opt = 0;
-    const char      optstring[] = "mhsc:l:o:p::w:x::y:z:t::i:u:";
+    const char      optstring[] = "mhsc:d:e:f:l:p::w:x::y:z:t::i:u:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "menu",        no_argument,       NULL,  'm' },
         { "help",        no_argument,       NULL,  'h' },
         { "sensors",     no_argument,       NULL,  's' },
         { "i2clcd",      required_argument, NULL,  'c' },
+        { "motordc",     required_argument, NULL,  'd' },
+        { "motorst",     required_argument, NULL,  'e' },
+        { "motorsv",     required_argument, NULL,  'f' },
         { "led",         required_argument, NULL,  'l' },
-        { "motorsv",     required_argument, NULL,  'o' },
         { "sa_pm",       optional_argument, NULL,  'p' },
         { "si_bme280",   required_argument, NULL,  'w' },
         { "si_gp2y0e03", optional_argument, NULL,  'x' },
@@ -701,8 +761,10 @@ int main(int argc, char *argv[ ])
         case 'h': Run_Help(); break;
         case 's': Run_Sensors(); break;
         case 'c': Run_I2cLcd( optarg ); break;
+        case 'd': Run_MotorDC( optarg ); break;
+        case 'e': Run_MotorST( optarg ); break;
+        case 'f': Run_MotorSV( optarg ); break;
         case 'l': Run_Led( optarg ); break;
-        case 'o': Run_MotorSV( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
         case 'w': Run_Si_BME280( optarg ); break;
         case 'x': Run_Si_GP2Y0E03( optarg ); break;

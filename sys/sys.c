@@ -82,6 +82,8 @@ Sys_Init(
     HalI2cCmd_Init();
     HalI2cLcd_Init();
     HalLed_Init();
+    HalMotorDC_Init();
+    HalMotorST_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
 
@@ -117,6 +119,8 @@ Sys_Fini(
     HalI2cCmd_Fini();
     HalI2cLcd_Fini();
     HalLed_Fini();
+    HalMotorDC_Fini();
+    HalMotorST_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
 

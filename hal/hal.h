@@ -188,6 +188,18 @@ EHalBool_t      HalLed_Init( void );
 void            HalLed_Fini( void );
 void            HalLed_Set( unsigned char value );
 
+// DC モータ API
+EHalBool_t      HalMotorDC_Init( void );
+void            HalMotorDC_Fini( void );
+void            HalMotorDC_SetPwmDuty( EHalMotorState_t status, int rate );
+
+// ステッピングモータ API
+EHalBool_t      HalMotorST_Init( void );
+void            HalMotorST_Fini( void );
+void            HalMotorST_SetStatus( EHalMotorState_t status );
+void            HalMotorST_SetAngle( EHalMotorState_t status, double angle );
+void            HalMotorST_SetSpeed( unsigned int time_us );
+
 // サーボモータ API
 EHalBool_t      HalMotorSV_Init( void );
 void            HalMotorSV_Fini( void );
