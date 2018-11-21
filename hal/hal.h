@@ -191,7 +191,7 @@ void            HalLed_Set( unsigned char value );
 // DC モータ API
 EHalBool_t      HalMotorDC_Init( void );
 void            HalMotorDC_Fini( void );
-void            HalMotorDC_SetPwmDuty( EHalMotorState_t status, int rate );
+EHalBool_t      HalMotorDC_SetPwmDuty( EHalMotorState_t status, double rate );
 
 // ステッピングモータ API
 EHalBool_t      HalMotorST_Init( void );
@@ -203,7 +203,7 @@ void            HalMotorST_SetSpeed( unsigned int time_us );
 // サーボモータ API
 EHalBool_t      HalMotorSV_Init( void );
 void            HalMotorSV_Fini( void );
-void            HalMotorSV_SetPwmDuty( EHalMotorState_t status, int rate );
+EHalBool_t      HalMotorSV_SetPwmDuty( EHalMotorState_t status, double rate );
 
 // プッシュ・スイッチ API
 EHalBool_t      HalPushSw_Init( void );

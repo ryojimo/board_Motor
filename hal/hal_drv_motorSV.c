@@ -2,9 +2,11 @@
  *  @file           hal_motorSV.c
  *  @brief          [HAL] サーボモータ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
- *  @attention      サーボモータのパルス周期は 15 ～ 20ms にする必要があるらしい。
- *                  15ms -> 66.6666Hz
- *                  20ms -> 50Hz
+ *  @attention      01. PWM サイクル : 20ms (= 50Hz )
+ *                  02. 制御パルス   : 0.5ms ～ 2.4ms
+ *                      0.5 ms : duty= 2.5 % の時 -90°
+ *                      1.45ms : duty= 7.25% の時   0°
+ *                      2.4 ms : duty=12.0 % の時 +90°
  *  @sa             none.
  *  @bug            none.
  *  @warning        none.
@@ -33,7 +35,7 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define MOTOR_SV_OUT    (18)
+#define MOTOR_OUT     (18)
 
 
 //********************************************************
@@ -94,7 +96,7 @@ InitReg(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    pinMode( MOTOR_SV_OUT, PWM_OUTPUT );
+    pinMode( MOTOR_OUT, PWM_OUTPUT );
     pwmSetMode( PWM_MODE_MS );
     pwmSetClock( 192 );
     pwmSetRange( 100 );
@@ -145,26 +147,26 @@ HalMotorSV_Fini(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
+
+    HalMotorSV_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     return;
 }
 
 
 /**************************************************************************//*!
  * @brief     サーボモータを回す。
- * @attention サーボモータのパルス周期は 15 ～ 20ms にする必要があるらしい。
- *            15ms -> 66.6666Hz
- *            20ms -> 50Hz
+ * @attention なし。
  * @note      PWM のカウントアップ・カウンタは 5kHz (= 0.2ms ) の速さでカウントアップ
- *            PWM 周波数は 50Hz
- *            100 カウントアップで 1 周期 (= 50Hz )
+ *            100 カウントアップ (= 20ms ) で 1 周期なので
+ *            PWM 周波数は 50Hz ( 20ms x 50Hz = 1000ms = 1s )
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    なし。
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
-void
+EHalBool_t
 HalMotorSV_SetPwmDuty(
     EHalMotorState_t    status, ///< [in] モータの状態
-    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    double              rate    ///< [in] デューティ比 : 0.0% ～ 100.0% まで
 ){
     unsigned int        clock = 0;  // PWM のカウンタのカウントアップ周期を設定するために使用するパラメータ
     unsigned int        range = 0;  // PWM の周期を設定するために使用するパラメータ
@@ -172,16 +174,23 @@ HalMotorSV_SetPwmDuty(
 
     DBG_PRINT_TRACE( "rate    = %d%% \n\r", rate );
 
+    if( rate < 2.5 || 12 < rate )
+    {
+        return EN_FALSE;
+    }
+
     // PWM のカウンタのカウントアップ周期
-    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ
-    clock = 3840;    // 2 - 4095 まで
+    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ ( 0.2ms )
+    clock = 3840;   // 2 - 4095 まで
 
     // PWM 周期
     // 5kHz / range(=100) = 50Hz
     range = 100;    // 1 - 4096 まで
 
+    // pwmWrite() にセットするのは 0~100 ではなくて 0~1024 の値をとる
+    // とのことなので、値を変換する。
     // デューティ比 = value / range
-    value = rate / 8 + 2;
+    value = 1024 * rate / 100;
 
     pwmSetClock( clock );
     pwmSetRange( range );
@@ -189,13 +198,13 @@ HalMotorSV_SetPwmDuty(
     if( status == EN_MOTOR_CCW ||
         status == EN_MOTOR_CW   )
     {
-        pwmWrite( MOTOR_SV_OUT, value );
+        pwmWrite( MOTOR_OUT, value );
     } else
     {
-        pwmWrite( MOTOR_SV_OUT, 0 );
+        pwmWrite( MOTOR_OUT, 0 );
     }
 
-    return;
+    return EN_TRUE;
 }
 
 

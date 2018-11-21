@@ -31,7 +31,7 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define MOTOR_DC_OUT    (18)
+#define MOTOR_OUT     (13)
 
 
 //********************************************************
@@ -92,7 +92,7 @@ InitReg(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    pinMode( MOTOR_DC_OUT, PWM_OUTPUT );
+    pinMode( MOTOR_OUT, PWM_OUTPUT );
     pwmSetMode( PWM_MODE_MS );
     pwmSetClock( 192 );
     pwmSetRange( 100 );
@@ -143,6 +143,8 @@ HalMotorDC_Fini(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
+
+    HalMotorDC_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     return;
 }
 
@@ -150,17 +152,17 @@ HalMotorDC_Fini(
 /**************************************************************************//*!
  * @brief     DC モータを回す。
  * @attention なし。
- * @note      PWM のカウントアップ・カウンタは 100kHz (= 0.01ms ) の速さでカウントアップ
- *            PWM 周波数は 1kHz
- *            100 カウントアップで 1 周期 (= 1kHz )
+ * @note      PWM のカウントアップ・カウンタは 5kHz (= 0.2ms ) の速さでカウントアップ
+ *            100 カウントアップ (= 20ms ) で 1 周期なので
+ *            PWM 周波数は 50Hz ( 20ms x 50Hz = 1000ms = 1s )
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    なし。
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
-void
+EHalBool_t
 HalMotorDC_SetPwmDuty(
     EHalMotorState_t    status, ///< [in] モータの状態
-    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    double              rate    ///< [in] デューティ比 : 0.0% ～ 100.0% まで
 ){
     unsigned int        clock = 0;  // PWM のカウンタのカウントアップ周期を設定するために使用するパラメータ
     unsigned int        range = 0;  // PWM の周期を設定するために使用するパラメータ
@@ -169,15 +171,17 @@ HalMotorDC_SetPwmDuty(
     DBG_PRINT_TRACE( "rate    = %d%% \n\r", rate );
 
     // PWM のカウンタのカウントアップ周期
-    // 19.2MHz / clock(=192) = 100kHz でカウントアップ
-    clock = 192;    // 2 - 4095 まで
+    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ ( 0.2ms )
+    clock = 3840;   // 2 - 4095 まで
 
     // PWM 周期
-    // 100kHz / range(=100) = 1kHz
+    // 5kHz / range(=100) = 50Hz
     range = 100;    // 1 - 4096 まで
 
+    // pwmWrite() にセットするのは 0~100 ではなくて 0~1024 の値をとる
+    // とのことなので、値を変換する。
     // デューティ比 = value / range
-    value = rate;
+    value = 1024 * rate / 100;
 
     pwmSetClock( clock );
     pwmSetRange( range );
@@ -185,13 +189,13 @@ HalMotorDC_SetPwmDuty(
     if( status == EN_MOTOR_CCW ||
         status == EN_MOTOR_CW   )
     {
-        pwmWrite( MOTOR_DC_OUT, value );
+        pwmWrite( MOTOR_OUT, value );
     } else
     {
-        pwmWrite( MOTOR_DC_OUT, 0 );
+        pwmWrite( MOTOR_OUT, 0 );
     }
 
-    return;
+    return EN_TRUE;
 }
 
 
