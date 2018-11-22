@@ -82,9 +82,9 @@ Sys_Init(
     HalI2cCmd_Init();
     HalI2cLcd_Init();
     HalLed_Init();
-    HalMotorDC_Init();
+    HalMotorDC_Init( EN_MOTOR_DC_GPIO13 );
     HalMotorST_Init();
-    HalMotorSV_Init();
+    HalMotorSV_Init( EN_MOTOR_SV_GPIO18 );
     HalPushSw_Init();
 
     // SENSOR (ADC)

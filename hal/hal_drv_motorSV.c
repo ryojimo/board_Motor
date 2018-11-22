@@ -35,7 +35,7 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define MOTOR_OUT     (18)
+// なし
 
 
 //********************************************************
@@ -53,7 +53,7 @@
 //********************************************************
 /* モジュールグローバル変数                              */
 //********************************************************
-// なし
+static EHalMotorSV_t  g_target;
 
 
 //********************************************************
@@ -78,6 +78,7 @@ InitParam(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
+    g_target = EN_MOTOR_SV_GPIO18;
     return;
 }
 
@@ -96,7 +97,7 @@ InitReg(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    pinMode( MOTOR_OUT, PWM_OUTPUT );
+    pinMode( g_target, PWM_OUTPUT );
     pwmSetMode( PWM_MODE_MS );
     pwmSetClock( 192 );
     pwmSetRange( 100 );
@@ -115,13 +116,15 @@ InitReg(
  *************************************************************************** */
 EHalBool_t
 HalMotorSV_Init(
-    void  ///< [in] ナシ
+    EHalMotorSV_t   which   ///< [in] 対象のモータ
 ){
     EHalBool_t      ret = EN_FALSE;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     InitParam();
+
+    g_target = which;
     ret = InitReg();
     if( ret == EN_FALSE )
     {
@@ -189,7 +192,6 @@ HalMotorSV_SetPwmDuty(
 
     // pwmWrite() にセットするのは 0~100 ではなくて 0~1024 の値をとる
     // とのことなので、値を変換する。
-    // デューティ比 = value / range
     value = 1024 * rate / 100;
 
     pwmSetClock( clock );
@@ -198,10 +200,10 @@ HalMotorSV_SetPwmDuty(
     if( status == EN_MOTOR_CCW ||
         status == EN_MOTOR_CW   )
     {
-        pwmWrite( MOTOR_OUT, value );
+        pwmWrite( g_target, value );
     } else
     {
-        pwmWrite( MOTOR_OUT, 0 );
+        pwmWrite( g_target, 0 );
     }
 
     return EN_TRUE;
