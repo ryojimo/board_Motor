@@ -27,7 +27,7 @@
 #include "./hal/hal.h"
 
 
-//#define DBG_PRINT
+#define DBG_PRINT
 #define MY_NAME "MAI"
 #include "./app/log/log.h"
 
@@ -142,11 +142,29 @@ Run_I2cLcd(
  *************************************************************************** */
 static void
 Run_I2cPca9685(
-    char*  str     ///< [in] 文字列
+    char*   str     ///< [in] 文字列
 ){
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    HalI2cPca9685_SetPwm( 1, 0, 120 );
+    while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+    {
+        HalI2cPca9685_SetPwm(  0, 0, 0x0        );
+        HalI2cPca9685_SetPwm(  1, 0, 0xFFF /  1 );
+        HalI2cPca9685_SetPwm(  2, 0, 0xFFF /  2 );
+        HalI2cPca9685_SetPwm(  3, 0, 0xFFF /  3 );
+        HalI2cPca9685_SetPwm(  4, 0, 0xFFF /  4 );
+        HalI2cPca9685_SetPwm(  5, 0, 0xFFF /  5 );
+        HalI2cPca9685_SetPwm(  6, 0, 0xFFF /  6 );
+        HalI2cPca9685_SetPwm(  7, 0, 0xFFF /  7 );
+        HalI2cPca9685_SetPwm(  8, 0, 0xFFF /  8 );
+        HalI2cPca9685_SetPwm(  9, 0, 0xFFF /  9 );
+        HalI2cPca9685_SetPwm( 10, 0, 0xFFF / 10 );
+        HalI2cPca9685_SetPwm( 11, 0, 0xFFF / 11 );
+        HalI2cPca9685_SetPwm( 12, 0, 0xFFF / 12 );
+        HalI2cPca9685_SetPwm( 13, 0, 0xFFF / 13 );
+        HalI2cPca9685_SetPwm( 14, 0, 0xFFF / 14 );
+        HalI2cPca9685_SetPwm( 15, 0, 0xFFF / 15 );
+    }
 
     return;
 }

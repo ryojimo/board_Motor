@@ -23,7 +23,7 @@
 #include "hal.h"
 
 
-//#define DBG_PRINT
+#define DBG_PRINT
 #define MY_NAME "HAL"
 #include "../app/log/log.h"
 
@@ -209,6 +209,16 @@ SetPwmFreq(
 
     DBG_PRINT_TRACE( "\n\r" );
 
+    // PCA9685_MODE1 に 0x0 を書き込む ( reset )
+    buff[0] = PCA9685_MODE1;
+    buff[1] = 0x0;
+    ret = HalCmnI2c_Write( buff, 2 );
+    if( ret == EN_FALSE )
+    {
+        DBG_PRINT_ERROR( "fail to write data to i2c slave. \n\r" );
+        return ret;
+    }
+
     // PCA9685_MODE1 のデータをスレーブデバイスから読み出す
     regAddr = PCA9685_MODE1;
     ret = HalCmnI2c_Write( &regAddr, 1 );
@@ -282,13 +292,13 @@ SetPwmFreq(
 EHalBool_t
 HalI2cPca9685_SetPwm(
     unsigned char   ch,     ///< [in] 対象の ch
-    unsigned int    on,     ///< [in] 
-    unsigned int    off     ///< [in] 
+    unsigned int    on,     ///< [in] PWM の H 出力する時間 ( 基本的に 0 をセット )
+    unsigned int    off     ///< [in] PWM の L 出力する時間
 ){
     EHalBool_t      ret = EN_FALSE;
     unsigned char   buff[5];
 
-    DBG_PRINT_TRACE( "\n\r" );
+//    DBG_PRINT_TRACE( "\n\r" );
 
     buff[0] = LED0_ON_L + 4 * ch;
     buff[1] = on;
