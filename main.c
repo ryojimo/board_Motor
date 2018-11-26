@@ -64,6 +64,7 @@ extern int  optind, opterr, optopt;
 static void         Run_Help( void );
 
 static void         Run_I2cLcd( char* str );
+static void         Run_I2cPca9685( char* str );
 static void         Run_Led( char* str );
 static void         Run_MotorDC( char* str );
 static void         Run_MotorST( char* str );
@@ -93,6 +94,7 @@ Run_Help(
     printf( " -h, --help                : display the command option list.               \n\r" );
     printf( "                                                                            \n\r" );
     printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
+    printf( " -g, --i2cpca9685 <value>  : Control the (I2C) PCA9685.                     \n\r" );
     printf( "                                                                            \n\r" );
     printf( " -d, --motordc <value>     : Control the DC motor.                          \n\r" );
     printf( " -e, --motorst <value>     : Control the STEPPING motor.                    \n\r" );
@@ -125,6 +127,26 @@ Run_I2cLcd(
     AppIfLcd_Printf( str );
     AppIfLcd_CursorSet( 0, 1 );
     AppIfLcd_Printf( "                " );
+
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     I2C PCA9685 を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_I2cPca9685(
+    char*  str     ///< [in] 文字列
+){
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    HalI2cPca9685_SetPwm( 1, 0, 120 );
 
     return;
 }
@@ -333,11 +355,12 @@ err :
 int main(int argc, char *argv[ ])
 {
     int             opt = 0;
-    const char      optstring[] = "hc:d:e:f:l:p::t::";
+    const char      optstring[] = "hc:d:e:f:g:l:p::t::";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "help",        no_argument,       NULL,  'h' },
         { "i2clcd",      required_argument, NULL,  'c' },
+        { "i2cpca9685",  required_argument, NULL,  'g' },
         { "motordc",     required_argument, NULL,  'd' },
         { "motorst",     required_argument, NULL,  'e' },
         { "motorsv",     required_argument, NULL,  'f' },
@@ -352,6 +375,7 @@ int main(int argc, char *argv[ ])
     HalCmnSpi_Init();
 
     HalI2cLcd_Init();
+    HalI2cPca9685_Init();
     HalLed_Init();
     HalMotorDC_Init();
     HalMotorST_Init();
@@ -385,6 +409,7 @@ int main(int argc, char *argv[ ])
         case 'd': Run_MotorDC( optarg ); break;
         case 'e': Run_MotorST( optarg ); break;
         case 'f': Run_MotorSV( optarg ); break;
+        case 'g': Run_I2cPca9685( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
         default:
@@ -395,6 +420,7 @@ int main(int argc, char *argv[ ])
     }
 
     HalI2cLcd_Fini();
+    HalI2cPca9685_Fini();
     HalLed_Fini();
     HalMotorDC_Fini();
     HalMotorST_Fini();
