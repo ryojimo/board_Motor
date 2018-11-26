@@ -79,7 +79,6 @@ Sys_Init(
     HalCmnI2c_Init();
     HalCmnSpi_Init();
 
-//    HalI2cCmd_Init();
     HalI2cLcd_Init();
     HalLed_Init();
     HalMotorDC_Init();
@@ -89,12 +88,6 @@ Sys_Init(
 
     // SENSOR (ADC)
     HalSensorPm_Init();
-
-    // SENSOR (I2C)
-//    HalSensorBME280_Init();
-//    HalSensorGP2Y0E03_Init();
-//    HalSensorLPS25H_Init();
-//    HalSensorTSL2561_Init();
 
     HalTime_Init();
 
@@ -116,7 +109,6 @@ Sys_Fini(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    HalI2cCmd_Fini();
     HalI2cLcd_Fini();
     HalLed_Fini();
     HalMotorDC_Fini();
@@ -126,12 +118,6 @@ Sys_Fini(
 
     // SENSOR (ADC)
     HalSensorPm_Fini();
-
-    // SENSOR (I2C)
-    HalSensorBME280_Fini();
-    HalSensorGP2Y0E03_Fini();
-    HalSensorLPS25H_Fini();
-    HalSensorTSL2561_Fini();
 
 //  HalTime モジュールに Fini() 処理はない
 
