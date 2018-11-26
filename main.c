@@ -71,8 +71,6 @@ static void         Run_MotorSV( char* str );
 
 static void         Run_Sa_Pm( char* str );
 
-static void         Run_Time( char* str );
-
 
 
 
@@ -102,9 +100,6 @@ Run_Help(
     printf( "                                                                            \n\r" );
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
     printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
-    printf( "                      json : value of json format.                          \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -t, --time                : Get the time.                                  \n\r" );
     printf( "                      json : value of json format.                          \n\r" );
     printf( "\n\r" );
 
@@ -328,65 +323,6 @@ err :
 
 
 /**************************************************************************//*!
- * @brief     時間情報を表示する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Time(
-    char*           str     ///< [in] 文字列
-){
-    SHalTime_t*     data;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( str == NULL )
-    {
-        data = HalTime_GetLocaltime();
-
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
-
-        printf( "%4d/%02d/%02d %02d:%02d:%02d",
-                data->year, data->month, data->day,
-                data->hour, data->min, data->sec
-              );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        data = HalTime_GetLocaltime();
-
-        AppIfLcd_CursorSet( 0, 0 );
-        AppIfLcd_Printf( "%4d/%02d/%02d", data->year, data->month, data->day );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%02d:%02d:%02d", data->hour, data->min, data->sec );
-
-        printf( "{ " );
-        printf( "  \"time\": {" );
-        printf( "    \"year\" : %4d,",  data->year );
-        printf( "    \"month\": %02d,", data->month );
-        printf( "    \"day\"  : %02d,", data->day );
-        printf( "    \"hour\" : %02d,", data->hour );
-        printf( "    \"min\"  : %02d,", data->min );
-        printf( "    \"sec\"  : %02d,", data->sec );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     メイン
  * @attention なし。
  * @note      なし。
@@ -407,7 +343,6 @@ int main(int argc, char *argv[ ])
         { "motorsv",     required_argument, NULL,  'f' },
         { "led",         required_argument, NULL,  'l' },
         { "sa_pm",       optional_argument, NULL,  'p' },
-        { "time",        optional_argument, NULL,  't' },
         { 0,             0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
@@ -452,7 +387,6 @@ int main(int argc, char *argv[ ])
         case 'f': Run_MotorSV( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
-        case 't': Run_Time( optarg ); break;
         default:
             DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
             Run_Help();
