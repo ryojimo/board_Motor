@@ -267,15 +267,27 @@ Run_Led(
  *************************************************************************** */
 static void
 Run_MotorDC(
-    char*   str     ///< [in] 文字列
+    char*           str     ///< [in] 文字列
 ){
-    int     data = 0;
+    int             data = 0;
+    SHalSensor_t*   value;
+
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
     if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
         HalMotorDC_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
+    } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
+    {
+        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+        {
+            value = HalSensorPm_Get();
+
+            AppIfLcd_CursorSet( 0, 1 );
+            AppIfLcd_Printf( "%3d %%", value->cur_rate );
+            HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+        }
     } else if( 0 != isdigit( str[0] ) )
     {
         data = atoi( (const char*)str );
@@ -330,15 +342,29 @@ Run_MotorST(
  *************************************************************************** */
 static void
 Run_MotorSV(
-    char*   str     ///< [in] 文字列
+    char*           str     ///< [in] 文字列
 ){
-    int     data = 0;
+    int             data = 0;
+    SHalSensor_t*   value;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
     if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
         HalMotorSV_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
+    } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
+    {
+        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+        {
+            value = HalSensorPm_Get();
+
+            data = ( 12 - 3 ) * value->cur_rate / 100;
+            data = 3 + data;
+
+            AppIfLcd_CursorSet( 0, 1 );
+            AppIfLcd_Printf( "%3d %%", data );
+            HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
+        }
     } else if( 0 != isdigit( str[0] ) )
     {
         data = atoi( (const char*)str );
