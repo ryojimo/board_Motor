@@ -17,6 +17,7 @@
 //********************************************************
 /* include                                               */
 //********************************************************
+#include <ctype.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -272,11 +273,23 @@ Run_MotorDC(
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    data = atoi( (const char*)str );
-    DBG_PRINT_TRACE( "data = %d \n", data );
-    HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
+    if( 0 == strncmp( str, "standby", strlen("standby") ) )
+    {
+        HalMotorDC_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
+    } else if( 0 != isdigit( str[0] ) )
+    {
+        data = atoi( (const char*)str );
+        DBG_PRINT_TRACE( "data = %d \n", data );
+        HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
 //  usleep( 1000 * 1000 );  // 2s 待つ
 
+err :
     return;
 }
 
@@ -323,11 +336,23 @@ Run_MotorSV(
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    data = atoi( (const char*)str );
-    DBG_PRINT_TRACE( "data = %d \n", data );
-    HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
+    if( 0 == strncmp( str, "standby", strlen("standby") ) )
+    {
+        HalMotorSV_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
+    } else if( 0 != isdigit( str[0] ) )
+    {
+        data = atoi( (const char*)str );
+        DBG_PRINT_TRACE( "data = %d \n", data );
+        HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
 //  usleep( 1000 * 1000 );  // 2s 待つ
 
+err :
     return;
 }
 

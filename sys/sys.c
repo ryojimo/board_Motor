@@ -79,22 +79,22 @@ Sys_Init(
     HalCmnI2c_Init();
     HalCmnSpi_Init();
 
-    HalI2cCmd_Init();
+//    HalI2cCmd_Init();
     HalI2cLcd_Init();
     HalLed_Init();
-    HalMotorDC_Init( EN_MOTOR_DC_GPIO13 );
+    HalMotorDC_Init();
     HalMotorST_Init();
-    HalMotorSV_Init( EN_MOTOR_SV_GPIO18 );
+    HalMotorSV_Init();
     HalPushSw_Init();
 
     // SENSOR (ADC)
     HalSensorPm_Init();
 
     // SENSOR (I2C)
-    HalSensorBME280_Init();
-    HalSensorGP2Y0E03_Init();
-    HalSensorLPS25H_Init();
-    HalSensorTSL2561_Init();
+//    HalSensorBME280_Init();
+//    HalSensorGP2Y0E03_Init();
+//    HalSensorLPS25H_Init();
+//    HalSensorTSL2561_Init();
 
     HalTime_Init();
 

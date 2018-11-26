@@ -98,22 +98,6 @@ typedef enum tagEHalI2cCmd
 //*************************************
 // デバイスを区別するための型
 //*************************************
-// DC モーターの区別に使用する型
-typedef enum tagEHalMotorDC
-{
-    EN_MOTOR_DC_GPIO13 = 0,        ///< @var : DC モータ 0
-    EN_MOTOR_DC_GPIO19,            ///< @var : DC モータ 1
-} EHalMotorDC_t;
-
-
-// サーボモータの区別に使用する型
-typedef enum tagEHalMotorSV
-{
-    EN_MOTOR_SV_GPIO18 = 0,         ///< @var : サーボモータ 0
-    EN_MOTOR_SV_GPIO12,             ///< @var : サーボモータ 1
-} EHalMotorSV_t;
-
-
 // SENSOR (ADC) 加速度計センサの区別に使用する型
 typedef enum tagEHalSensorAcc
 {
@@ -205,9 +189,9 @@ void            HalLed_Fini( void );
 void            HalLed_Set( unsigned char value );
 
 // DC モータ API
-EHalBool_t      HalMotorDC_Init( EHalMotorDC_t which );
+EHalBool_t      HalMotorDC_Init( void );
 void            HalMotorDC_Fini( void );
-EHalBool_t      HalMotorDC_SetPwmDuty( EHalMotorState_t status, double rate );
+void            HalMotorDC_SetPwmDuty( EHalMotorState_t status, int rate );
 
 // ステッピングモータ API
 EHalBool_t      HalMotorST_Init( void );
@@ -217,9 +201,9 @@ void            HalMotorST_SetAngle( EHalMotorState_t status, double angle );
 void            HalMotorST_SetSpeed( unsigned int time_us );
 
 // サーボモータ API
-EHalBool_t      HalMotorSV_Init( EHalMotorSV_t which );
+EHalBool_t      HalMotorSV_Init( void );
 void            HalMotorSV_Fini( void );
-EHalBool_t      HalMotorSV_SetPwmDuty( EHalMotorState_t status, double rate );
+void            HalMotorSV_SetPwmDuty( EHalMotorState_t status, int rate );
 
 // プッシュ・スイッチ API
 EHalBool_t      HalPushSw_Init( void );

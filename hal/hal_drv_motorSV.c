@@ -35,7 +35,7 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-// なし
+#define MOTOR_OUT    (18)
 
 
 //********************************************************
@@ -53,7 +53,7 @@
 //********************************************************
 /* モジュールグローバル変数                              */
 //********************************************************
-static EHalMotorSV_t  g_target;
+// なし
 
 
 //********************************************************
@@ -78,7 +78,6 @@ InitParam(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    g_target = EN_MOTOR_SV_GPIO18;
     return;
 }
 
@@ -96,12 +95,6 @@ InitReg(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
-    pinMode( g_target, PWM_OUTPUT );
-    pwmSetMode( PWM_MODE_MS );
-    pwmSetClock( 192 );
-    pwmSetRange( 100 );
-
     return EN_TRUE;
 }
 
@@ -116,15 +109,13 @@ InitReg(
  *************************************************************************** */
 EHalBool_t
 HalMotorSV_Init(
-    EHalMotorSV_t   which   ///< [in] 対象のモータ
+    void  ///< [in] ナシ
 ){
     EHalBool_t      ret = EN_FALSE;
 
     DBG_PRINT_TRACE( "\n\r" );
 
     InitParam();
-
-    g_target = which;
     ret = InitReg();
     if( ret == EN_FALSE )
     {
@@ -150,8 +141,6 @@ HalMotorSV_Fini(
     void  ///< [in] ナシ
 ){
     DBG_PRINT_TRACE( "\n\r" );
-
-    HalMotorSV_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     return;
 }
 
@@ -159,54 +148,60 @@ HalMotorSV_Fini(
 /**************************************************************************//*!
  * @brief     サーボモータを回す。
  * @attention なし。
- * @note      PWM のカウントアップ・カウンタは 5kHz (= 0.2ms ) の速さでカウントアップ
- *            100 カウントアップ (= 20ms ) で 1 周期なので
- *            PWM 周波数は 50Hz ( 20ms x 50Hz = 1000ms = 1s )
+ * @note      PWM のカウンタのカウントアップを 5kHz (= 0.2ms ) の速さでカウントアップする設定
+ *              => 19.2MHz / clock(=3840) = 5kHz
+ *            100 カウントアップで PWM 1 周期に設定
+ *              => 0.2ms * cnt(=100) = 20ms (= 50Hz )
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ * @return    なし。
  *************************************************************************** */
-EHalBool_t
+void
 HalMotorSV_SetPwmDuty(
     EHalMotorState_t    status, ///< [in] モータの状態
-    double              rate    ///< [in] デューティ比 : 0.0% ～ 100.0% まで
+    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
-    unsigned int        clock = 0;  // PWM のカウンタのカウントアップ周期を設定するために使用するパラメータ
-    unsigned int        range = 0;  // PWM の周期を設定するために使用するパラメータ
     unsigned int        value = 0;
+    unsigned int        clock = 3840;
+    unsigned int        cnt = 100;
 
-    DBG_PRINT_TRACE( "rate    = %d%% \n\r", rate );
+    DBG_PRINT_TRACE( "status = %d \n\r", status );
+    DBG_PRINT_TRACE( "rate   = %d%% \n\r", rate );
 
-    if( rate < 2.5 || 12 < rate )
+    // デューティ比 = value / range
+    value = rate;
+
+    if( status == EN_MOTOR_STANDBY )
     {
-        return EN_FALSE;
-    }
-
-    // PWM のカウンタのカウントアップ周期
-    // 19.2MHz / clock(=3840) = 5kHz でカウントアップ ( 0.2ms )
-    clock = 3840;   // 2 - 4095 まで
-
-    // PWM 周期
-    // 5kHz / range(=100) = 50Hz
-    range = 100;    // 1 - 4096 まで
-
-    // pwmWrite() にセットするのは 0~100 ではなくて 0~1024 の値をとる
-    // とのことなので、値を変換する。
-    value = 1024 * rate / 100;
-
-    pwmSetClock( clock );
-    pwmSetRange( range );
-
-    if( status == EN_MOTOR_CCW ||
-        status == EN_MOTOR_CW   )
+        pinMode( MOTOR_OUT, OUTPUT );
+        digitalWrite( MOTOR_OUT, EN_LOW );
+    } else if( status == EN_MOTOR_BRAKE )
     {
-        pwmWrite( g_target, value );
+        pinMode( MOTOR_OUT, PWM_OUTPUT );
+        pwmSetMode( PWM_MODE_MS );
+        pwmSetClock( clock );
+        pwmSetRange( cnt );
+        pwmWrite( MOTOR_OUT, 0 );
+    } else if( status == EN_MOTOR_CCW || status == EN_MOTOR_CW )
+    {
+        pinMode( MOTOR_OUT, PWM_OUTPUT );
+        pwmSetMode( PWM_MODE_MS );
+        pwmSetClock( clock );
+        pwmSetRange( cnt );
+        pwmWrite( MOTOR_OUT, value );
+    } else if( status == EN_MOTOR_STOP )
+    {
+        pinMode( MOTOR_OUT, PWM_OUTPUT );
+        pwmSetMode( PWM_MODE_MS );
+        pwmSetClock( clock );
+        pwmSetRange( cnt );
+        pwmWrite( MOTOR_OUT, 0 );
     } else
     {
-        pwmWrite( g_target, 0 );
+        ;
     }
 
-    return EN_TRUE;
+    return;
 }
 
 
