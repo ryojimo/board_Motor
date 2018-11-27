@@ -72,6 +72,8 @@ static void         Run_MotorSV( char* str );
 
 static void         Run_Sa_Pm( char* str );
 
+static void         Run_Si_BMX055( char* str );
+
 
 
 
@@ -103,6 +105,12 @@ Run_Help(
     printf( " -l, --led <value>         : Control the LED.                               \n\r" );
     printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
     printf( "                      json : value of json format.                          \n\r" );
+    printf( "                                                                            \n\r" );
+    printf( " -x, --si_bmx055 [OPTION]  : Get the value of a sensor(I2C), BMX055.        \n\r" );
+    printf( "                         x : X direction.                                   \n\r" );
+    printf( "                         y : Y direction.                                   \n\r" );
+    printf( "                         z : Z direction.                                   \n\r" );
+    printf( "                      json : all values of json format.                     \n\r" );
     printf( "\n\r" );
 
     return;
@@ -161,12 +169,10 @@ Run_I2cPca9685(
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
         {
             value = HalSensorPm_Get();
+            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
 
             data = ( 11 - 3 ) * value->cur_rate / 100;
             data = 3 + data;
-
-            AppIfLcd_CursorSet( 0, 1 );
-            AppIfLcd_Printf( "%3d %%", data );
 
             for( ch = 0; ch < 16; ch++ )
             {
@@ -183,6 +189,7 @@ Run_I2cPca9685(
             while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
             {
                 value = HalSensorPm_Get();
+                DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
 
                 data = ( 11 - 3 ) * value->cur_rate / 100;
                 data = 3 + data;
@@ -255,9 +262,7 @@ Run_MotorDC(
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
         {
             value = HalSensorPm_Get();
-
-            AppIfLcd_CursorSet( 0, 1 );
-            AppIfLcd_Printf( "%3d %%", value->cur_rate );
+            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
             HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
         }
     } else if( 0 != isdigit( str[0] ) )
@@ -329,12 +334,11 @@ Run_MotorSV(
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
         {
             value = HalSensorPm_Get();
+            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
 
             data = ( 12 - 3 ) * value->cur_rate / 100;
             data = 3 + data;
 
-            AppIfLcd_CursorSet( 0, 1 );
-            AppIfLcd_Printf( "%3d %%", data );
             HalMotorSV_SetPwmDuty( EN_MOTOR_CW, data );
         }
     } else if( 0 != isdigit( str[0] ) )
@@ -400,6 +404,71 @@ err :
 
 
 /**************************************************************************//*!
+ * @brief     加速度センサ ( BMX055 ) を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_Si_BMX055(
+    char*           str     ///< [in] 文字列
+){
+    SHalSensor_t*   data;
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "x", strlen("x") ) )
+    {
+        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_X );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "y", strlen("y") ) )
+    {
+        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Y );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "z", strlen("z") ) )
+    {
+        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataX = HalSensorBmx055_GetAcc( EN_SEN_BMX055_X );
+        dataY = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Y );
+        dataZ = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_bmx055\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"x\": %f,", dataX->cur );
+        printf( "    \"y\": %f,", dataY->cur );
+        printf( "    \"z\": %f ", dataZ->cur );
+        printf( "  }" );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     メイン
  * @attention なし。
  * @note      なし。
@@ -410,7 +479,7 @@ err :
 int main(int argc, char *argv[ ])
 {
     int             opt = 0;
-    const char      optstring[] = "hc:d:e:f:g:l:p::t::";
+    const char      optstring[] = "hc:d:e:f:g:l:p::t::x:";
     const struct    option longopts[] = {
       //{ *name,         has_arg,           *flag, val }, // 説明
         { "help",        no_argument,       NULL,  'h' },
@@ -421,6 +490,7 @@ int main(int argc, char *argv[ ])
         { "motorsv",     required_argument, NULL,  'f' },
         { "led",         required_argument, NULL,  'l' },
         { "sa_pm",       optional_argument, NULL,  'p' },
+        { "si_bmx055",   required_argument, NULL,  'x' },
         { 0,             0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
@@ -436,6 +506,7 @@ int main(int argc, char *argv[ ])
     HalMotorST_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
+    HalSensorBmx055_Init();
 
     // SENSOR (ADC)
     HalSensorPm_Init();
@@ -467,6 +538,7 @@ int main(int argc, char *argv[ ])
         case 'g': Run_I2cPca9685( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
+        case 'x': Run_Si_BMX055( optarg ); break;
         default:
             DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
             Run_Help();
@@ -481,6 +553,7 @@ int main(int argc, char *argv[ ])
     HalMotorST_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
+    HalSensorBmx055_Fini();
 
     // SENSOR (ADC)
     HalSensorPm_Fini();
