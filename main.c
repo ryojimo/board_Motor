@@ -27,7 +27,7 @@
 #include "./hal/hal.h"
 
 
-#define DBG_PRINT
+//#define DBG_PRINT
 #define MY_NAME "MAI"
 #include "./app/log/log.h"
 
@@ -144,6 +144,7 @@ static void
 Run_I2cPca9685(
     char*           str     ///< [in] 文字列
 ){
+    int             ch = 0;
     int             data = 0;
     SHalSensor_t*   value;
 
@@ -151,10 +152,11 @@ Run_I2cPca9685(
 
     if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
-        HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_STANDBY, 0 );
-        HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_STANDBY, 0 );
-        HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_STANDBY, 0 );
-    } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
+        for( ch = 0; ch < 16; ch++ )
+        {
+            HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_STANDBY, 0 );
+        }
+    } else if( 0 == strncmp( str, "all", strlen("all") ) )
     {
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
         {
@@ -165,17 +167,33 @@ Run_I2cPca9685(
 
             AppIfLcd_CursorSet( 0, 1 );
             AppIfLcd_Printf( "%3d %%", data );
-            HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_CW, data );
-            HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_CW, data );
-            HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_CW, data );
+
+            for( ch = 0; ch < 16; ch++ )
+            {
+                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
+            }
         }
     } else if( 0 != isdigit( str[0] ) )
     {
-        data = atoi( (const char*)str );
+        ch = atoi( (const char*)str );
         DBG_PRINT_TRACE( "data = %d \n", data );
-        HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_CW, data );
-        HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_CW, data );
-        HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_CW, data );
+
+        if( 0 <= ch && ch <= 15 )
+        {
+            while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+            {
+                value = HalSensorPm_Get();
+
+                data = ( 11 - 3 ) * value->cur_rate / 100;
+                data = 3 + data;
+
+                HalI2cPca9685_SetPwmDuty( ch, EN_MOTOR_CW, data );
+            }
+        } else
+        {
+            DBG_PRINT_ERROR( "invalid ch number error. Please input between 0 and 15. : %d \n\r", ch );
+            goto err;
+        }
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
