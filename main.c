@@ -142,30 +142,49 @@ Run_I2cLcd(
  *************************************************************************** */
 static void
 Run_I2cPca9685(
-    char*   str     ///< [in] 文字列
+    char*           str     ///< [in] 文字列
 ){
+    int             data = 0;
+    SHalSensor_t*   value;
+
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
-    while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+    if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
-        HalI2cPca9685_SetPwm(  0, 0, 0x0        );
-        HalI2cPca9685_SetPwm(  1, 0, 0xFFF /  1 );
-        HalI2cPca9685_SetPwm(  2, 0, 0xFFF /  2 );
-        HalI2cPca9685_SetPwm(  3, 0, 0xFFF /  3 );
-        HalI2cPca9685_SetPwm(  4, 0, 0xFFF /  4 );
-        HalI2cPca9685_SetPwm(  5, 0, 0xFFF /  5 );
-        HalI2cPca9685_SetPwm(  6, 0, 0xFFF /  6 );
-        HalI2cPca9685_SetPwm(  7, 0, 0xFFF /  7 );
-        HalI2cPca9685_SetPwm(  8, 0, 0xFFF /  8 );
-        HalI2cPca9685_SetPwm(  9, 0, 0xFFF /  9 );
-        HalI2cPca9685_SetPwm( 10, 0, 0xFFF / 10 );
-        HalI2cPca9685_SetPwm( 11, 0, 0xFFF / 11 );
-        HalI2cPca9685_SetPwm( 12, 0, 0xFFF / 12 );
-        HalI2cPca9685_SetPwm( 13, 0, 0xFFF / 13 );
-        HalI2cPca9685_SetPwm( 14, 0, 0xFFF / 14 );
-        HalI2cPca9685_SetPwm( 15, 0, 0xFFF / 15 );
+        HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_STANDBY, 0 );
+        HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_STANDBY, 0 );
+        HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_STANDBY, 0 );
+    } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
+    {
+        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
+        {
+            value = HalSensorPm_Get();
+
+            data = ( 11 - 3 ) * value->cur_rate / 100;
+            data = 3 + data;
+
+            AppIfLcd_CursorSet( 0, 1 );
+            AppIfLcd_Printf( "%3d %%", data );
+            HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_CW, data );
+            HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_CW, data );
+            HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_CW, data );
+        }
+    } else if( 0 != isdigit( str[0] ) )
+    {
+        data = atoi( (const char*)str );
+        DBG_PRINT_TRACE( "data = %d \n", data );
+        HalI2cPca9685_SetPwmDuty( 0, EN_MOTOR_CW, data );
+        HalI2cPca9685_SetPwmDuty( 1, EN_MOTOR_CW, data );
+        HalI2cPca9685_SetPwmDuty( 2, EN_MOTOR_CW, data );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
     }
 
+//  usleep( 1000 * 1000 );  // 2s 待つ
+
+err :
     return;
 }
 

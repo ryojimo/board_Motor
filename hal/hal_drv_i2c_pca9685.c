@@ -31,22 +31,22 @@
 //********************************************************
 /*! @def                                                 */
 //********************************************************
-#define PCA9685_SUBADR1 0x2
-#define PCA9685_SUBADR2 0x3
-#define PCA9685_SUBADR3 0x4
+#define PCA9685_SUBADR1   (0x2)
+#define PCA9685_SUBADR2   (0x3)
+#define PCA9685_SUBADR3   (0x4)
 
-#define PCA9685_MODE1 0x0
-#define PCA9685_PRESCALE 0xFE
+#define PCA9685_MODE1     (0x0)
+#define PCA9685_PRESCALE  (0xFE)
 
-#define LED0_ON_L 0x6
-#define LED0_ON_H 0x7
-#define LED0_OFF_L 0x8
-#define LED0_OFF_H 0x9
+#define LED0_ON_L         (0x6)
+#define LED0_ON_H         (0x7)
+#define LED0_OFF_L        (0x8)
+#define LED0_OFF_H        (0x9)
 
-#define ALLLED_ON_L 0xFA
-#define ALLLED_ON_H 0xFB
-#define ALLLED_OFF_L 0xFC
-#define ALLLED_OFF_H 0xFD
+#define ALLLED_ON_L       (0xFA)
+#define ALLLED_ON_H       (0xFB)
+#define ALLLED_OFF_L      (0xFC)
+#define ALLLED_OFF_H      (0xFD)
 
 
 //********************************************************
@@ -75,6 +75,7 @@ static EHalBool_t   InitReg( void );
 
 static void         InitDevice( void );
 static EHalBool_t   SetPwmFreq( double freq );
+static EHalBool_t   SetPwm( unsigned char ch, unsigned int on, unsigned int off );
 
 
 
@@ -209,6 +210,9 @@ SetPwmFreq(
 
     DBG_PRINT_TRACE( "\n\r" );
 
+    // I2C スレーブデバイスを PCA9685 に変える
+    HalCmnI2c_SetSlave( I2C_SLAVE_PCA9685 );
+
     // PCA9685_MODE1 に 0x0 を書き込む ( reset )
     buff[0] = PCA9685_MODE1;
     buff[1] = 0x0;
@@ -289,9 +293,9 @@ SetPwmFreq(
  * @author    Ryoji Morita
  * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
-EHalBool_t
-HalI2cPca9685_SetPwm(
-    unsigned char   ch,     ///< [in] 対象の ch
+static EHalBool_t
+SetPwm(
+    unsigned char   ch,     ///< [in] 対象の ch ( 0 ～ 15 )
     unsigned int    on,     ///< [in] PWM の H 出力する時間 ( 基本的に 0 をセット )
     unsigned int    off     ///< [in] PWM の L 出力する時間
 ){
@@ -300,7 +304,10 @@ HalI2cPca9685_SetPwm(
 
 //    DBG_PRINT_TRACE( "\n\r" );
 
-    buff[0] = LED0_ON_L + 4 * ch;
+    // I2C スレーブデバイスを PCA9685 に変える
+    HalCmnI2c_SetSlave( I2C_SLAVE_PCA9685 );
+
+    buff[0] = LED0_ON_L + ( 4 * ch );
     buff[1] = on;
     buff[2] = on >> 8;
     buff[3] = off;
@@ -314,6 +321,53 @@ HalI2cPca9685_SetPwm(
     }
 
     ret = EN_TRUE;
+    return ret;
+}
+
+
+/**************************************************************************//*!
+ * @brief     指定した ch に PWM 波形を出力する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ *************************************************************************** */
+EHalBool_t
+HalI2cPca9685_SetPwmDuty(
+    unsigned char       ch,     ///< [in] 対象の ch ( 0 ～ 15 )
+    EHalMotorState_t    status, ///< [in] モータの状態
+    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
+){
+    EHalBool_t      ret = EN_FALSE;
+    unsigned int    on = 0;
+    unsigned int    off = 0;
+
+//    DBG_PRINT_TRACE( "\n\r" );
+
+    on = 0;
+    off = 0xFFF * rate / 100;
+
+    // I2C スレーブデバイスを PCA9685 に変える
+    HalCmnI2c_SetSlave( I2C_SLAVE_PCA9685 );
+
+    if( status == EN_MOTOR_STANDBY )
+    {
+        ret = SetPwm( ch, on, 0 );
+    } else if( status == EN_MOTOR_BRAKE )
+    {
+        ret = SetPwm( ch, on, 0 );
+    } else if( status == EN_MOTOR_CCW || status == EN_MOTOR_CW )
+    {
+        ret = SetPwm( ch, on, off );
+    } else if( status == EN_MOTOR_STOP )
+    {
+        ret = SetPwm( ch, on, 0 );
+    } else
+    {
+        ;
+    }
+
     return ret;
 }
 
