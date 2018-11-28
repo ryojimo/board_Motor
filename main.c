@@ -1,13 +1,6 @@
 /**************************************************************************//*!
  *  @file           main.c
  *  @brief          main() を定義したファイル。
- *  @author         Ryoji Morita
- *  @attention      none.
- *  @sa             none.
- *  @bug            none.
- *  @warning        none.
- *  @version        1.00
- *  @last updated   2016.12.03
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -72,18 +65,15 @@ static void         Run_MotorSV( char* str );
 
 static void         Run_Sa_Pm( char* str );
 
-static void         Run_Si_BMX055( char* str );
+static void         Run_Si_BMX055_Acc( char* str );
+static void         Run_Si_BMX055_Gyro( char* str );
+static void         Run_Si_BMX055_Mag( char* str );
 
 
 
 
 /**************************************************************************//*!
  * @brief     HELP を表示する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_Help(
@@ -91,26 +81,36 @@ Run_Help(
 ){
     DBG_PRINT_TRACE( "\n\r" );
 
-    printf( " COMMAND                   : DESCRIPTION                                    \n\r" );
-    printf( "============================================================================\n\r" );
-    printf( " -h, --help                : display the command option list.               \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -c, --i2clcd <value>      : Control the (I2C) LCD.                         \n\r" );
-    printf( " -g, --i2cpca9685 <value>  : Control the (I2C) PCA9685.                     \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -d, --motordc <value>     : Control the DC motor.                          \n\r" );
-    printf( " -e, --motorst <value>     : Control the STEPPING motor.                    \n\r" );
-    printf( " -f, --motorsv <value>     : Control the SAVO motor.                        \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -l, --led <value>         : Control the LED.                               \n\r" );
-    printf( " -p, --sa_pm               : Get the value of a sensor(A/D), Potentiometer. \n\r" );
-    printf( "                      json : value of json format.                          \n\r" );
-    printf( "                                                                            \n\r" );
-    printf( " -x, --si_bmx055 [OPTION]  : Get the value of a sensor(I2C), BMX055.        \n\r" );
-    printf( "                         x : X direction.                                   \n\r" );
-    printf( "                         y : Y direction.                                   \n\r" );
-    printf( "                         z : Z direction.                                   \n\r" );
-    printf( "                      json : all values of json format.                     \n\r" );
+    printf( " COMMAND                      : DESCRIPTION                                    \n\r" );
+    printf( "===============================================================================\n\r" );
+    printf( " -h, --help                   : display the command option list.               \n\r" );
+    printf( "                                                                               \n\r" );
+    printf( " -c, --i2clcd <value>         : Control the (I2C) LCD.                         \n\r" );
+    printf( " -g, --i2cpca9685 <value>     : Control the (I2C) PCA9685.                     \n\r" );
+    printf( "                                                                               \n\r" );
+    printf( " -d, --motordc <value>        : Control the DC motor.                          \n\r" );
+    printf( " -e, --motorst <value>        : Control the STEPPING motor.                    \n\r" );
+    printf( " -f, --motorsv <value>        : Control the SAVO motor.                        \n\r" );
+    printf( "                                                                               \n\r" );
+    printf( " -l, --led <value>            : Control the LED.                               \n\r" );
+    printf( " -p, --sa_pm                  : Get the value of a sensor(A/D), Potentiometer. \n\r" );
+    printf( "                         json : value of json format.                          \n\r" );
+    printf( "                                                                               \n\r" );
+    printf( " -x, --si_bmx055acc [OPTION]  : Get ACC of a sensor(I2C), BMX055.              \n\r" );
+    printf( "                            x : X-axis                                         \n\r" );
+    printf( "                            y : Y-axis                                         \n\r" );
+    printf( "                            z : Z-axis                                         \n\r" );
+    printf( "                         json : all values of json format.                     \n\r" );
+    printf( " -y, --si_bmx055gyro [OPTION] : Get GYRO of a sensor(I2C), BMX055.             \n\r" );
+    printf( "                            x : X-axis                                         \n\r" );
+    printf( "                            y : Y-axis                                         \n\r" );
+    printf( "                            z : Z-axis                                         \n\r" );
+    printf( "                         json : all values of json format.                     \n\r" );
+    printf( " -z, --si_bmx055mag [OPTION]  : Get MAG of a sensor(I2C), BMX055.              \n\r" );
+    printf( "                            x : X-axis                                         \n\r" );
+    printf( "                            y : Y-axis                                         \n\r" );
+    printf( "                            z : Z-axis                                         \n\r" );
+    printf( "                         json : all values of json format.                     \n\r" );
     printf( "\n\r" );
 
     return;
@@ -119,11 +119,6 @@ Run_Help(
 
 /**************************************************************************//*!
  * @brief     I2C LCD を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_I2cLcd(
@@ -142,11 +137,6 @@ Run_I2cLcd(
 
 /**************************************************************************//*!
  * @brief     I2C PCA9685 を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_I2cPca9685(
@@ -216,11 +206,6 @@ err :
 
 /**************************************************************************//*!
  * @brief     LED を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_Led(
@@ -238,11 +223,6 @@ Run_Led(
 
 /**************************************************************************//*!
  * @brief     DC MOTOR を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_MotorDC(
@@ -285,11 +265,6 @@ err :
 
 /**************************************************************************//*!
  * @brief     STEPPING MOTOR を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_MotorST(
@@ -311,11 +286,6 @@ Run_MotorST(
 
 /**************************************************************************//*!
  * @brief     SERVO MOTOR を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_MotorSV(
@@ -361,11 +331,6 @@ err :
 
 /**************************************************************************//*!
  * @brief     ポテンショメーターを実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 Run_Sa_Pm(
@@ -405,14 +370,9 @@ err :
 
 /**************************************************************************//*!
  * @brief     加速度センサ ( BMX055 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
-Run_Si_BMX055(
+Run_Si_BMX055_Acc(
     char*           str     ///< [in] 文字列
 ){
     SHalSensor_t*   data;
@@ -450,7 +410,127 @@ Run_Si_BMX055(
         AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
 
         printf( "{ " );
-        printf( "  \"sensor\": \"si_bmx055\"," );
+        printf( "  \"sensor\": \"si_bmx055acc\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"x\": %f,", dataX->cur );
+        printf( "    \"y\": %f,", dataY->cur );
+        printf( "    \"z\": %f ", dataZ->cur );
+        printf( "  }" );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     ジャイロセンサ ( BMX055 ) を実行する
+ *************************************************************************** */
+static void
+Run_Si_BMX055_Gyro(
+    char*           str     ///< [in] 文字列
+){
+    SHalSensor_t*   data;
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "x", strlen("x") ) )
+    {
+        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_X );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "y", strlen("y") ) )
+    {
+        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Y );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "z", strlen("z") ) )
+    {
+        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataX = HalSensorBmx055_GetGyro( EN_SEN_BMX055_X );
+        dataY = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Y );
+        dataZ = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_bmx055gyro\"," );
+        printf( "  \"value\": {" );
+        printf( "    \"x\": %f,", dataX->cur );
+        printf( "    \"y\": %f,", dataY->cur );
+        printf( "    \"z\": %f ", dataZ->cur );
+        printf( "  }" );
+        printf( "}" );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
+        goto err;
+    }
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
+ * @brief     磁気センサ ( BMX055 ) を実行する
+ *************************************************************************** */
+static void
+Run_Si_BMX055_Mag(
+    char*           str     ///< [in] 文字列
+){
+    SHalSensor_t*   data;
+    SHalSensor_t*   dataX;
+    SHalSensor_t*   dataY;
+    SHalSensor_t*   dataZ;
+
+    DBG_PRINT_TRACE( "str = %s \n\r", str );
+
+    if( 0 == strncmp( str, "x", strlen("x") ) )
+    {
+        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_X );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "y", strlen("y") ) )
+    {
+        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Y );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "z", strlen("z") ) )
+    {
+        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        printf( "%f", data->cur );
+    } else if( 0 == strncmp( str, "json", strlen("json") ) )
+    {
+        dataX = HalSensorBmx055_GetMag( EN_SEN_BMX055_X );
+        dataY = HalSensorBmx055_GetMag( EN_SEN_BMX055_Y );
+        dataZ = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
+
+        AppIfLcd_CursorSet( 0, 1 );
+        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+
+        printf( "{ " );
+        printf( "  \"sensor\": \"si_bmx055mag\"," );
         printf( "  \"value\": {" );
         printf( "    \"x\": %f,", dataX->cur );
         printf( "    \"y\": %f,", dataY->cur );
@@ -470,28 +550,25 @@ err :
 
 /**************************************************************************//*!
  * @brief     メイン
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 int main(int argc, char *argv[ ])
 {
     int             opt = 0;
-    const char      optstring[] = "hc:d:e:f:g:l:p::t::x:";
+    const char      optstring[] = "hc:d:e:f:g:l:p::t::x:y:z:";
     const struct    option longopts[] = {
-      //{ *name,         has_arg,           *flag, val }, // 説明
-        { "help",        no_argument,       NULL,  'h' },
-        { "i2clcd",      required_argument, NULL,  'c' },
-        { "i2cpca9685",  required_argument, NULL,  'g' },
-        { "motordc",     required_argument, NULL,  'd' },
-        { "motorst",     required_argument, NULL,  'e' },
-        { "motorsv",     required_argument, NULL,  'f' },
-        { "led",         required_argument, NULL,  'l' },
-        { "sa_pm",       optional_argument, NULL,  'p' },
-        { "si_bmx055",   required_argument, NULL,  'x' },
-        { 0,             0,                 NULL,   0  }, // termination
+      //{ *name,           has_arg,           *flag, val }, // 説明
+        { "help",          no_argument,       NULL,  'h' },
+        { "i2clcd",        required_argument, NULL,  'c' },
+        { "i2cpca9685",    required_argument, NULL,  'g' },
+        { "motordc",       required_argument, NULL,  'd' },
+        { "motorst",       required_argument, NULL,  'e' },
+        { "motorsv",       required_argument, NULL,  'f' },
+        { "led",           required_argument, NULL,  'l' },
+        { "sa_pm",         optional_argument, NULL,  'p' },
+        { "si_bmx055acc",  required_argument, NULL,  'x' },
+        { "si_bmx055gyro", required_argument, NULL,  'y' },
+        { "si_bmx055mag",  required_argument, NULL,  'z' },
+        { 0,               0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
 
@@ -538,7 +615,9 @@ int main(int argc, char *argv[ ])
         case 'g': Run_I2cPca9685( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
-        case 'x': Run_Si_BMX055( optarg ); break;
+        case 'x': Run_Si_BMX055_Acc( optarg ); break;
+        case 'y': Run_Si_BMX055_Gyro( optarg ); break;
+        case 'z': Run_Si_BMX055_Mag( optarg ); break;
         default:
             DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
             Run_Help();

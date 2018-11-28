@@ -222,6 +222,8 @@ SetConfigAcc(
     EHalBool_t      ret = EN_FALSE;
     unsigned char   buff[2];
 
+    DBG_PRINT_TRACE( "\n\r" );
+
     // I2C スレーブデバイスを BMX055 ACC に変える
     HalCmnI2c_SetSlave( I2C_SLAVE_BMX055_ACC );
 
@@ -232,7 +234,7 @@ SetConfigAcc(
     usleep( 100 * 1000 );
 
     buff[0] = 0x10;                   // Select PMU_BW register
-    buff[1] = 0x08;                   // Bandwidth = 7.81 Hz
+    buff[1] = 0x0F;                   // Bandwidth = 1kHz
     ret = HalCmnI2c_Write( buff, 2 );
     if( ret == EN_FALSE ){ goto err; }
     usleep( 100 * 1000 );
@@ -264,6 +266,8 @@ SetConfigGyro(
 ){
     EHalBool_t      ret = EN_FALSE;
     unsigned char   buff[2];
+
+    DBG_PRINT_TRACE( "\n\r" );
 
     // I2C スレーブデバイスを BMX055 ACC に変える
     HalCmnI2c_SetSlave( I2C_SLAVE_BMX055_GYRO );
@@ -308,46 +312,44 @@ SetConfigMag(
     EHalBool_t      ret = EN_FALSE;
     unsigned char   buff[2];
 
+    DBG_PRINT_TRACE( "\n\r" );
+
     // I2C スレーブデバイスを BMX055 MAG に変える
     HalCmnI2c_SetSlave( I2C_SLAVE_BMX055_MAG );
 
-    buff[0] = 0x4B;                   // Select Mag register
-    buff[1] = 0x01;                   // Soft reset
-    ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
-    usleep( 100 * 1000 );
-
+#if 0
     buff[0] = 0x4B;                   // Select Mag register
     buff[1] = 0x83;                   // Soft reset
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "01 \n\r" ); goto err; }
     usleep( 100 * 1000 );
+#endif
 
     buff[0] = 0x4B;                   // Select Mag register
     buff[1] = 0x01;                   // Soft reset
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "02 \n\r" ); goto err; }
     usleep( 100 * 1000 );
 
     buff[0] = 0x4C;                   // Select Mag register
     buff[1] = 0x00;                   // Normal Mode, ODR = 10 Hz
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "03 \n\r" ); goto err; }
 
     buff[0] = 0x4E;                   // Select Mag register
     buff[1] = 0x84;                   // X, Y, Z-Axis enabled
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "04 \n\r" ); goto err; }
 
     buff[0] = 0x51;                   // Select Mag register
     buff[1] = 0x04;                   // No. of Repetitions for X-Y Axis = 9
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "05 \n\r" ); goto err; }
 
     buff[0] = 0x52;                   // Select Mag register
     buff[1] = 0x16;                   // No. of Repetitions for Z-Axis = 15
     ret = HalCmnI2c_Write( buff, 2 );
-    if( ret == EN_FALSE ){ goto err; }
+    if( ret == EN_FALSE ){ DBG_PRINT_ERROR( "06 \n\r" ); goto err; }
 
     return EN_TRUE;
 err:
