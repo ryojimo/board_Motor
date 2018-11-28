@@ -1,13 +1,6 @@
 /**************************************************************************//*!
  *  @file           hal_cmn_gpio.c
  *  @brief          [HAL] GPIO の共通 API を定義したファイル。
- *  @author         Ryoji Morita
- *  @attention      none.
- *  @sa             none.
- *  @bug            none.
- *  @warning        none.
- *  @version        1.00
- *  @last updated   2016.06.05
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -62,11 +55,6 @@ static EHalBool_t   InitReg( void );
 
 /**************************************************************************//*!
  * @brief     ファイルスコープ内のグローバル変数を初期化する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 static void
 InitParam(
@@ -79,11 +67,6 @@ InitParam(
 
 /**************************************************************************//*!
  * @brief     H/W レジスタを初期化する。
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
 InitReg(
@@ -106,11 +89,6 @@ InitReg(
 
 /**************************************************************************//*!
  * @brief     GPIO 設定レジスタへアクセスするためにメモリアドレスを mmap する。
- * @attention なし。
- * @note      mmap で GPIO(物理メモリ) を gpio->map(仮想メモリ) に対応づける。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 EHalBool_t
 HalCmnGpio_Init(
@@ -129,11 +107,6 @@ HalCmnGpio_Init(
 
 /**************************************************************************//*!
  * @brief     GPIO レジスタのメモリアドレスを munmap する。
- * @attention なし。
- * @note      OpenGPIO() で呼んだ open()/mmap() を munmap()/close() する。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
  *************************************************************************** */
 void
 HalCmnGpio_Fini(

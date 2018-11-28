@@ -1,16 +1,6 @@
 /**************************************************************************//*!
  *  @file           hal.h
  *  @brief          [HAL] 外部公開 API を宣言したヘッダファイル。
- *  @author         Ryoji Morita
- *  @attention      none.
- *                  関数命名規則
- *                      通常         : Hal[デバイス名]_処理名()
- *                      割込ハンドラ : Hal[デバイス名]_IH_処理名()
- *  @sa             none.
- *  @bug            none.
- *  @warning        none.
- *  @version        1.00
- *  @last updated   2016.06.05
  *************************************************************************** */
 
 // 多重コンパイル抑止
@@ -96,9 +86,9 @@ typedef enum tagEHalSensorBMX055
 // プッシュ・スイッチの区別に使用する型
 typedef enum tagEHalPushSw
 {
-    EN_PUSH_SW_0 = 0,               ///< @var : プッシュ・スイッチ 0
-    EN_PUSH_SW_1,                   ///< @var : プッシュ・スイッチ 1
-    EN_PUSH_SW_2                    ///< @var : プッシュ・スイッチ 2
+    EN_PUSH_SW_0 = 0,       ///< @var : プッシュ・スイッチ 0
+    EN_PUSH_SW_1,           ///< @var : プッシュ・スイッチ 1
+    EN_PUSH_SW_2            ///< @var : プッシュ・スイッチ 2
 } EHalPushSw_t;
 
 
