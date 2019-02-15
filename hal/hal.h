@@ -121,6 +121,11 @@ EHalBool_t      HalMotorDC_Init( void );
 void            HalMotorDC_Fini( void );
 void            HalMotorDC_SetPwmDuty( EHalMotorState_t status, int rate );
 
+// DC モータ2 API
+EHalBool_t      HalMotorDC2_Init( void );
+void            HalMotorDC2_Fini( void );
+void            HalMotorDC2_SetPwmDuty( EHalMotorState_t status, int rate );
+
 // ステッピングモータ API
 EHalBool_t      HalMotorST_Init( void );
 void            HalMotorST_Fini( void );

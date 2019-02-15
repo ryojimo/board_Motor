@@ -237,6 +237,7 @@ Run_MotorDC(
     if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
         HalMotorDC_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
+        HalMotorDC2_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
     {
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
@@ -244,12 +245,14 @@ Run_MotorDC(
             value = HalSensorPm_Get();
             DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
             HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+            HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
         }
     } else if( 0 != isdigit( str[0] ) )
     {
         data = atoi( (const char*)str );
         DBG_PRINT_TRACE( "data = %d \n", data );
         HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
+        HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, data );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
@@ -580,6 +583,7 @@ int main(int argc, char *argv[ ])
     HalI2cPca9685_Init();
     HalLed_Init();
     HalMotorDC_Init();
+    HalMotorDC2_Init();
     HalMotorST_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
@@ -629,6 +633,7 @@ int main(int argc, char *argv[ ])
     HalI2cPca9685_Fini();
     HalLed_Fini();
     HalMotorDC_Fini();
+    HalMotorDC2_Fini();
     HalMotorST_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
