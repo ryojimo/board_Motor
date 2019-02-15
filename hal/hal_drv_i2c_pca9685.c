@@ -1,6 +1,13 @@
 /**************************************************************************//*!
  *  @file           hal_i2c_pca9685.c
  *  @brief          [HAL] I2C PCA9685 ドライバ API を定義したファイル。
+ *  @author         Ryoji Morita
+ *  @attention      none.
+ *  @sa             none.
+ *  @bug            none.
+ *  @warning        none.
+ *  @version        1.00
+ *  @last updated   2019.01.17
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -75,6 +82,11 @@ static EHalBool_t   SetPwm( unsigned char ch, unsigned int on, unsigned int off 
 
 /**************************************************************************//*!
  * @brief     ファイルスコープ内のグローバル変数を初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
  *************************************************************************** */
 static void
 InitParam(
@@ -87,6 +99,11 @@ InitParam(
 
 /**************************************************************************//*!
  * @brief     H/W レジスタを初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
 InitReg(
@@ -99,6 +116,11 @@ InitReg(
 
 /**************************************************************************//*!
  * @brief     デバイスを初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
  *************************************************************************** */
 static void
 InitDevice(
@@ -112,6 +134,11 @@ InitDevice(
 
 /**************************************************************************//*!
  * @brief     I2C PCA9685 を初期化する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 EHalBool_t
 HalI2cPca9685_Init(
@@ -142,6 +169,11 @@ HalI2cPca9685_Init(
 
 /**************************************************************************//*!
  * @brief     I2C LCD を終了する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
  *************************************************************************** */
 void
 HalI2cPca9685_Fini(
@@ -154,6 +186,11 @@ HalI2cPca9685_Fini(
 
 /**************************************************************************//*!
  * @brief     PWM 周波数を設定する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
 SetPwmFreq(
@@ -250,6 +287,11 @@ SetPwmFreq(
 
 /**************************************************************************//*!
  * @brief     指定した ch に PWM 波形を出力する。
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 static EHalBool_t
 SetPwm(
@@ -285,12 +327,18 @@ SetPwm(
 
 /**************************************************************************//*!
  * @brief     指定した ch に PWM 波形を出力する。
+ * @attention なし。
+ * @note      一般的な SERVO MOTOR の場合、PWM duty 比はは「3% ~ 12%」まで。( サーボモータの仕様 )
+ *            https://www.tohuandkonsome.site/entry/2017/08/24/101259
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    EN_TRUE : 成功, EN_FALSE : 失敗
  *************************************************************************** */
 EHalBool_t
 HalI2cPca9685_SetPwmDuty(
     unsigned char       ch,     ///< [in] 対象の ch ( 0 ～ 15 )
     EHalMotorState_t    status, ///< [in] モータの状態
-    int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
+    double              rate    ///< [in] デューティ比 : 0.0% ～ 100.0% まで
 ){
     EHalBool_t      ret = EN_FALSE;
     unsigned int    on = 0;

@@ -1,13 +1,13 @@
 /**************************************************************************//*!
- *  @file           hal_cmn_gpio.c
- *  @brief          [HAL] GPIO の共通 API を定義したファイル。
+ *  @file           if_pc.c
+ *  @brief          [APP] PC のターミナルに文字を UART 送信/受信する。
  *  @author         Ryoji Morita
  *  @attention      none.
  *  @sa             none.
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
- *  @last updated   2016.06.05
+ *  @last updated   2016.07.01
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
@@ -17,14 +17,15 @@
 //********************************************************
 /* include                                               */
 //********************************************************
-#include <wiringPi.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdio.h>
 
-#include "hal_cmn.h"
-
+#include "if_pc.h"
 
 //#define DBG_PRINT
-#define MY_NAME "HAL"
-#include "../app/log/log.h"
+#define MY_NAME "APP"
+#include "../log/log.h"
 
 
 //********************************************************
@@ -54,93 +55,112 @@
 //********************************************************
 /* 関数プロトタイプ宣言                                  */
 //********************************************************
-static void         InitParam( void );
-static EHalBool_t   InitReg( void );
+// なし
 
 
 
 
 /**************************************************************************//*!
- * @brief     ファイルスコープ内のグローバル変数を初期化する。
+ * @brief     PC ターミナルへ 1 文字を出力する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    なし。
+ * @return    成功時 = 出力した 1 文字 , 失敗時 = EOF
  *************************************************************************** */
-static void
-InitParam(
-    void  ///< [in] ナシ
+int
+AppIfPc_Putc(
+    int             c   ///< [in] 送信する 1 文字
 ){
     DBG_PRINT_TRACE( "\n\r" );
-    return;
+    return putchar( c );
 }
 
 
 /**************************************************************************//*!
- * @brief     H/W レジスタを初期化する。
+ * @brief     PC ターミナルへ文字列を出力する。
  * @attention なし。
  * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ * @return    成功時 = 出力した文字数 , 失敗時 = EOF
  *************************************************************************** */
-static EHalBool_t
-InitReg(
-    void  ///< [in] ナシ
+int
+AppIfPc_Puts(
+    const char*     str     ///< [in] 送信する文字列
 ){
-    EHalBool_t      ret = EN_FALSE;
-    int             res = 0;
+    DBG_PRINT_TRACE( "\n\r" );
+    return puts( str );
+}
+
+
+/**************************************************************************//*!
+ * @brief     PC ターミナルへ文字列を printf() 関数フォーマットのように出力する。
+ * @attention 浮動小数点関係は、未実装。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    成功時 = 出力した文字数 , 失敗時 = -1
+ *************************************************************************** */
+int
+AppIfPc_Printf(
+    const char*     format, ///< [in] 送信する文字列
+    ...                     ///< [in] 可変個数引数
+){
+    int             ret = 0;
+    va_list         list;
 
     DBG_PRINT_TRACE( "\n\r" );
 
-    res = wiringPiSetupGpio();
-    if( res != -1 )
-    {
-        ret = EN_TRUE;
-    }
+    va_start( list, format );
+    ret = vprintf( format, list );
+    va_end( list );
 
     return ret;
 }
 
 
 /**************************************************************************//*!
- * @brief     GPIO 設定レジスタへアクセスするためにメモリアドレスを mmap する。
+ * @brief     PC ターミナルから 1 文字を入力する。
  * @attention なし。
- * @note      mmap で GPIO(物理メモリ) を gpio->map(仮想メモリ) に対応づける。
+ * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    EN_TRUE : 成功, EN_FALSE : 失敗
+ * @return    成功時 = 入力した 1 文字 , 失敗時 = -1 (= EOF )
  *************************************************************************** */
-EHalBool_t
-HalCmnGpio_Init(
+int
+AppIfPc_Getc(
     void
 ){
-    EHalBool_t      ret = EN_FALSE;
-
     DBG_PRINT_TRACE( "\n\r" );
 
-    InitParam();
-    ret = InitReg();
-
-    return ret;
+    return getchar();
 }
 
 
 /**************************************************************************//*!
- * @brief     GPIO レジスタのメモリアドレスを munmap する。
+ * @brief     PC ターミナルから文字列を scanf() 関数フォーマットのように入力する。
  * @attention なし。
- * @note      OpenGPIO() で呼んだ open()/mmap() を munmap()/close() する。
+ * @note      なし。
  * @sa        なし。
  * @author    Ryoji Morita
- * @return    なし。
+ * @return    成功時 = 入力した文字数 , 失敗時 = -1 (= EOF )
  *************************************************************************** */
-void
-HalCmnGpio_Fini(
-    void
+int
+AppIfPc_Scanf(
+    const char*     format,     ///< [in] 受信する文字列をセットする変数
+    ...                         ///< [in] 可変個数引数
 ){
+    int             ret = 0;
+    va_list         list;
+
     DBG_PRINT_TRACE( "\n\r" );
-    return;
+
+    va_start( list, format );
+    ret = vscanf( format, list );
+    va_end( list );
+
+    return ret;
 }
 
 

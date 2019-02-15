@@ -1,6 +1,16 @@
 /**************************************************************************//*!
  *  @file           hal.h
  *  @brief          [HAL] 外部公開 API を宣言したヘッダファイル。
+ *  @author         Ryoji Morita
+ *  @attention      none.
+ *                  関数命名規則
+ *                      通常         : Hal[デバイス名]_処理名()
+ *                      割込ハンドラ : Hal[デバイス名]_IH_処理名()
+ *  @sa             none.
+ *  @bug            none.
+ *  @warning        none.
+ *  @version        1.00
+ *  @last updated   2016.06.05
  *************************************************************************** */
 
 // 多重コンパイル抑止
@@ -95,7 +105,20 @@ typedef enum tagEHalPushSw
 //********************************************************
 /*! @struct                                              */
 //********************************************************
-// なし
+// 時間変数に使用する型
+typedef struct tagSHalTime
+{
+    unsigned long       wait;   ///< @var : wait カウンタ  ( 単位:  usec ) :   1 min で自動 0 クリア
+
+    unsigned int        usec;   ///< @var : 内部時計       ( 単位:  usec ) : 100 usec  ごとに加算
+    unsigned int        msec;   ///< @var : 内部時計       ( 単位:  msec ) :   1 msec  ごとに加算
+    unsigned char       sec;    ///< @var : 内部時計       ( 単位:   sec ) :   1 sec   ごとに加算
+    unsigned char       min;    ///< @var : 内部時計       ( 単位:   min ) :   1 min   ごとに加算
+    unsigned char       hour;   ///< @var : 内部時計       ( 単位:     h ) :   1 h     ごとに加算
+    unsigned char       day;    ///< @var : 内部カレンダー ( 単位:   day ) :   1 day   ごとに加算
+    unsigned short      month;  ///< @var : 内部カレンダー ( 単位: month ) :   1 month ごとに加算
+    unsigned short      year;   ///< @var : 内部カレンダー ( 単位:  西暦 ) :   1 year  ごとに加算
+} SHalTime_t;
 
 
 //********************************************************
@@ -109,7 +132,7 @@ EHalBool_t      HalI2cLcd_Write( EHalLcdMode_t rs, unsigned char code );
 // I2C PCA9685 API
 EHalBool_t      HalI2cPca9685_Init( void );
 void            HalI2cPca9685_Fini( void );
-EHalBool_t      HalI2cPca9685_SetPwmDuty( unsigned char ch, EHalMotorState_t status, int rate );
+EHalBool_t      HalI2cPca9685_SetPwmDuty( unsigned char ch, EHalMotorState_t status, double rate );
 
 // LED API
 EHalBool_t      HalLed_Init( void );
@@ -154,6 +177,11 @@ void            HalSensorBmx055_Fini( void );
 SHalSensor_t*   HalSensorBmx055_GetAcc( EHalSensorBMX055_t which );
 SHalSensor_t*   HalSensorBmx055_GetGyro( EHalSensorBMX055_t which );
 SHalSensor_t*   HalSensorBmx055_GetMag( EHalSensorBMX055_t which );
+
+// 時間 API
+EHalBool_t      HalTime_Init( void );
+SHalTime_t*     HalTime_GetLocaltime( void );
+SHalTime_t*     HalTime_GetUTC( void );
 
 
 #endif /* _HAL_H_ */

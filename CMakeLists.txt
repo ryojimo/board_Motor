@@ -13,14 +13,16 @@ add_definitions( -lrt -lwiringPi -Wl,-Map=board.map )
 # Targets.
 set( h_app ./app/if_lcd/ ./app/if_pc/ ./app/log/ )
 set( h_hal ./hal/ )
-set( h_all ${h_app} ${h_hal} )
+set( h_sys ./sys/ )
+set( h_all ${h_app} ${h_hal} ${h_sys} )
 include_directories( ${h_all} )
 message( "h_all: " ${h_all} "\n" )
 
 file( GLOB c_app  ./app/if_lcd/*.c ./app/if_pc/*.c ./app/log/*.c )
 file( GLOB c_hal  ./hal/*.c )
+file( GLOB c_sys  ./sys/*.c )
 file( GLOB c_main ./main.c )
-set( c_all ${c_app} ${c_hal} ${c_main} )
+set( c_all ${c_app} ${c_hal} ${c_sys} ${c_main} )
 message( "c_all: " ${c_all} "\n" )
 
 # Build and Link
