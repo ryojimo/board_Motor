@@ -279,6 +279,10 @@ Run_MotorDC(
         {
             value = HalSensorPm_Get();
             DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
+
+            AppIfLcd_CursorSet( 0, 1 );
+            AppIfLcd_Printf( "%3d%%", value->cur_rate );
+
             HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
             HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
         }
@@ -368,19 +372,19 @@ Run_Si_BMX055_Acc(
     {
         data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_X );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "y", strlen("y") ) )
     {
         data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Y );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "z", strlen("z") ) )
     {
         data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "json", strlen("json") ) )
     {
@@ -389,7 +393,7 @@ Run_Si_BMX055_Acc(
         dataZ = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
 
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
 
         printf( "{ " );
         printf( "  \"sensor\": \"si_bmx055acc\"," );
@@ -433,19 +437,19 @@ Run_Si_BMX055_Gyro(
     {
         data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_X );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "y", strlen("y") ) )
     {
         data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Y );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "z", strlen("z") ) )
     {
         data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "json", strlen("json") ) )
     {
@@ -454,7 +458,7 @@ Run_Si_BMX055_Gyro(
         dataZ = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
 
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
 
         printf( "{ " );
         printf( "  \"sensor\": \"si_bmx055gyro\"," );
@@ -498,19 +502,19 @@ Run_Si_BMX055_Mag(
     {
         data = HalSensorBmx055_GetMag( EN_SEN_BMX055_X );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "y", strlen("y") ) )
     {
         data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Y );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "z", strlen("z") ) )
     {
         data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "0x%04X", (int)data->cur );
+        AppIfLcd_Printf( "%+8.4f", data->cur );
         printf( "%f", data->cur );
     } else if( 0 == strncmp( str, "json", strlen("json") ) )
     {
@@ -519,7 +523,7 @@ Run_Si_BMX055_Mag(
         dataZ = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
 
         AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%04X, %04X, %04X", (int)dataX->cur, (int)dataY->cur, (int)dataZ->cur );
+        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
 
         printf( "{ " );
         printf( "  \"sensor\": \"si_bmx055mag\"," );

@@ -80,7 +80,6 @@ Sys_Init(
     HalCmnSpi_Init();
 
     HalI2cLcd_Init();
-    HalI2cPca9685_Init();
     HalLed_Init();
     HalMotorDC_Init();
     HalMotorDC2_Init();
@@ -113,7 +112,6 @@ Sys_Fini(
     DBG_PRINT_TRACE( "\n\r" );
 
     HalI2cLcd_Fini();
-    HalI2cPca9685_Fini();
     HalLed_Fini();
     HalMotorDC_Fini();
     HalMotorDC2_Fini();
