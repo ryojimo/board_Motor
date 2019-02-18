@@ -1,6 +1,13 @@
 /**************************************************************************//*!
  *  @file           hal_motorDC.c
  *  @brief          [HAL] DC モータ・ドライバ API を定義したファイル。
+ *  @author         Ryoji Morita
+ *  @attention      none.
+ *  @sa             none.
+ *  @bug            none.
+ *  @warning        none.
+ *  @version        1.00
+ *  @last updated   2019.01.17
  *************************************************************************** */
 #ifdef __cplusplus
     extern "C"{
