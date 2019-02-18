@@ -119,6 +119,7 @@ HalMotorDC2_Init(
         return ret;
     }
 
+    HalMotorDC2_SetPwmDuty( EN_MOTOR_STOP, 0 );
     ret = EN_TRUE;
     return ret;
 }

@@ -68,7 +68,6 @@ static void         Run_Version( void );
 static void         Run_I2cLcd( int argc, char *argv[] );
 static void         Run_Led( char* str );
 static void         Run_MotorDC( char* str );
-static void         Run_MotorDC2( char* str );
 
 static void         Run_Sa_Pm( char* str );
 
@@ -274,56 +273,6 @@ Run_MotorDC(
     if( 0 == strncmp( str, "standby", strlen("standby") ) )
     {
         HalMotorDC_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
-    } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
-    {
-        while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
-        {
-            value = HalSensorPm_Get();
-            DBG_PRINT_TRACE( "value->cur_rate = %3d %% \n", value->cur_rate );
-
-            AppIfLcd_CursorSet( 0, 1 );
-            AppIfLcd_Printf( "%3d%%", value->cur_rate );
-
-            HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
-        }
-    } else if( 0 != isdigit( str[0] ) )
-    {
-        data = atoi( (const char*)str );
-        DBG_PRINT_TRACE( "data = %d \n", data );
-        HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-//  usleep( 1000 * 1000 );  // 2s 待つ
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     DC MOTOR2 を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_MotorDC2(
-    char*           str     ///< [in] 文字列
-){
-    int             data = 0;
-    SHalSensor_t*   value;
-
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "standby", strlen("standby") ) )
-    {
         HalMotorDC2_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
     {
@@ -335,12 +284,24 @@ Run_MotorDC2(
             AppIfLcd_CursorSet( 0, 1 );
             AppIfLcd_Printf( "%3d%%", value->cur_rate );
 
-            HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+            // SW1 が押されたら、MotorDC  の PWM Duty を変更する
+            // SW2 が押されたら、MotorDC2 の PWM Duty を変更する
+            if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_1 ) )
+            {
+                HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+            } else if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_2 ) )
+            {
+                HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+            }
         }
+
+        HalMotorDC_SetPwmDuty( EN_MOTOR_STOP, 0 );
+        HalMotorDC2_SetPwmDuty( EN_MOTOR_STOP, 0 );
     } else if( 0 != isdigit( str[0] ) )
     {
         data = atoi( (const char*)str );
         DBG_PRINT_TRACE( "data = %d \n", data );
+        HalMotorDC_SetPwmDuty( EN_MOTOR_CW, data );
         HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, data );
     } else
     {
@@ -605,14 +566,13 @@ err :
 int main(int argc, char *argv[ ])
 {
     int             opt = 0;
-    const char      optstring[] = "hvc:d:e:l:p::x:y:z:";
+    const char      optstring[] = "hvc:d:l:p::x:y:z:";
     const struct    option longopts[] = {
       //{ *name,           has_arg,           *flag, val }, // 説明
         { "help",          no_argument,       NULL,  'h' },
         { "version",       no_argument,       NULL,  'v' },
         { "i2clcd",        required_argument, NULL,  'c' },
         { "motordc",       required_argument, NULL,  'd' },
-        { "motordc2",      required_argument, NULL,  'e' },
         { "led",           required_argument, NULL,  'l' },
         { "sa_pm",         optional_argument, NULL,  'p' },
         { "si_bmx055acc",  required_argument, NULL,  'x' },
@@ -664,7 +624,6 @@ int main(int argc, char *argv[ ])
         case 'h': Run_Help(); break;
         case 'v': Run_Version(); break;
         case 'd': Run_MotorDC( optarg ); break;
-        case 'e': Run_MotorDC2( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
         case 'x': Run_Si_BMX055_Acc( optarg ); break;
