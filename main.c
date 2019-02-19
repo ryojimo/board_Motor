@@ -102,8 +102,8 @@ Run_Help(
     printf( "    -s string, --string=string                                 \n\r" );
     printf( "                              the string to display on LCD.    \n\r" );
     printf("\x1b[32m");
-    printf( "                              Ex) -c        -x      <number>  -y      <number>  <string> \n\r" );
-    printf( "                                  --i2clcd  --dir_x=<number>  --dir_y=<number>  <string> \n\r" );
+    printf( "                              Ex) -c        -x      <number>  -y      <number>  -s       <string> \n\r" );
+    printf( "                                  --i2clcd  --dir_x=<number>  --dir_y=<number>  --string=<string> \n\r" );
     printf("\x1b[39m");
     printf( "                                                               \n\r" );
     printf( "  -d number, --motordc=number control the DC motor.            \n\r" );
@@ -188,6 +188,9 @@ Run_I2cLcd(
     DBG_PRINT_TRACE( "argv[1] = %s \n\r", argv[1] );
     DBG_PRINT_TRACE( "argv[2] = %s \n\r", argv[2] );
     DBG_PRINT_TRACE( "argv[3] = %s \n\r", argv[3] );
+    DBG_PRINT_TRACE( "argv[4] = %s \n\r", argv[4] );
+    DBG_PRINT_TRACE( "argv[5] = %s \n\r", argv[5] );
+    DBG_PRINT_TRACE( "argv[6] = %s \n\r", argv[6] );
 
     while( 1 )
     {
