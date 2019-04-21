@@ -32,10 +32,6 @@
 
 #define I2C_SLAVE_PCA9685       (0x40)
 
-#define I2C_SLAVE_BMX055_ACC    (0x19)
-#define I2C_SLAVE_BMX055_GYRO   (0x69)
-#define I2C_SLAVE_BMX055_MAG    (0x13)
-
 #define MCP3208_MAX_VALE        (0x0F60)
 
 

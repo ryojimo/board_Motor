@@ -84,15 +84,6 @@ typedef enum tagEHalMotorState
 //*************************************
 // デバイスを区別するための型
 //*************************************
-// SENSOR (I2C) BMX055 センサの axis の区別に使用する型
-typedef enum tagEHalSensorBMX055
-{
-    EN_SEN_BMX055_X = 0,    ///< @var : X-axis
-    EN_SEN_BMX055_Y,        ///< @var : Y-axis
-    EN_SEN_BMX055_Z         ///< @var : Z-axis
-} EHalSensorBMX055_t;
-
-
 // プッシュ・スイッチの区別に使用する型
 typedef enum tagEHalPushSw
 {
@@ -170,13 +161,6 @@ EHalBool_t      HalPushSw_Get( EHalPushSw_t );
 EHalBool_t      HalSensorPm_Init( void );
 void            HalSensorPm_Fini( void );
 SHalSensor_t*   HalSensorPm_Get( void );
-
-// SENSOR (I2C) BMX055 ACC API
-EHalBool_t      HalSensorBmx055_Init( void );
-void            HalSensorBmx055_Fini( void );
-SHalSensor_t*   HalSensorBmx055_GetAcc( EHalSensorBMX055_t which );
-SHalSensor_t*   HalSensorBmx055_GetGyro( EHalSensorBMX055_t which );
-SHalSensor_t*   HalSensorBmx055_GetMag( EHalSensorBMX055_t which );
 
 // 時間 API
 EHalBool_t      HalTime_Init( void );

@@ -71,10 +71,6 @@ static void         Run_MotorDC( char* str );
 
 static void         Run_Sa_Pm( char* str );
 
-static void         Run_Si_BMX055_Acc( char* str );
-static void         Run_Si_BMX055_Gyro( char* str );
-static void         Run_Si_BMX055_Mag( char* str );
-
 
 
 
@@ -107,30 +103,11 @@ Run_Help(
     printf("\x1b[39m");
     printf( "                                                               \n\r" );
     printf( "  -d number, --motordc=number control the DC motor.            \n\r" );
-    printf( "  -e number, --motordc2=number control the DC motor2.          \n\r" );
     printf( "                                                               \n\r" );
     printf( "  -l number, --led=number     control the LED.                 \n\r" );
     printf( "  -p [json], --sa_pm=[json]                                                  \n\r" );
     printf( "                              get the value of a sensor(A/D), Potentiometer. \n\r" );
     printf( "                              json : get the all values of json format.      \n\r" );
-    printf( "  -x {x|y|z|json}, --si_bmx055acc={x|y|z|json}                          \n\r" );
-    printf( "                              get ACC of a sensor(I2C), BMX055.         \n\r" );
-    printf( "                              x    : get the value of x-axis.           \n\r" );
-    printf( "                              y    : get the value of y-axis.           \n\r" );
-    printf( "                              z    : get the value of z-axis.           \n\r" );
-    printf( "                              json : get the all values of json format. \n\r" );
-    printf( "  -y {x|y|z|json}, --si_bmx055gyro={x|y|z|json}                         \n\r" );
-    printf( "                              get GYRO of a sensor(I2C), BMX055.        \n\r" );
-    printf( "                              x    : get the value of x-axis.           \n\r" );
-    printf( "                              y    : get the value of y-axis.           \n\r" );
-    printf( "                              z    : get the value of z-axis.           \n\r" );
-    printf( "                              json : get the all values of json format. \n\r" );
-    printf( "  -z {x|y|z|json}, --si_bmx055mag={x|y|z|json}                          \n\r" );
-    printf( "                              get MAG of a sensor(I2C), BMX055.         \n\r" );
-    printf( "                              x    : get the value of x-axis.           \n\r" );
-    printf( "                              y    : get the value of y-axis.           \n\r" );
-    printf( "                              z    : get the value of z-axis.           \n\r" );
-    printf( "                              json : get the all values of json format. \n\r" );
     printf( "\n\r" );
 
     return;
@@ -269,6 +246,7 @@ Run_MotorDC(
 ){
     int             data = 0;
     SHalSensor_t*   value;
+    EHalBool_t      flag = EN_FALSE;
 
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
@@ -291,8 +269,16 @@ Run_MotorDC(
             // SW2 が押されたら、MotorDC2 の PWM Duty を変更する
             if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_1 ) )
             {
-                HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+                flag = EN_TRUE;
             } else if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_2 ) )
+            {
+                flag = EN_FALSE;
+            }
+
+            if( flag == EN_TRUE )
+            {
+                HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+            } else
             {
                 HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
             }
@@ -364,201 +350,6 @@ err :
 
 
 /**************************************************************************//*!
- * @brief     加速度センサ ( BMX055 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Si_BMX055_Acc(
-    char*           str     ///< [in] 文字列
-){
-    SHalSensor_t*   data;
-    SHalSensor_t*   dataX;
-    SHalSensor_t*   dataY;
-    SHalSensor_t*   dataZ;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "x", strlen("x") ) )
-    {
-        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_X );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "y", strlen("y") ) )
-    {
-        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Y );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "z", strlen("z") ) )
-    {
-        data = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        dataX = HalSensorBmx055_GetAcc( EN_SEN_BMX055_X );
-        dataY = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Y );
-        dataZ = HalSensorBmx055_GetAcc( EN_SEN_BMX055_Z );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
-
-        printf( "{ " );
-        printf( "  \"sensor\": \"si_bmx055acc\"," );
-        printf( "  \"value\": {" );
-        printf( "    \"x\": %f,", dataX->cur );
-        printf( "    \"y\": %f,", dataY->cur );
-        printf( "    \"z\": %f ", dataZ->cur );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     ジャイロセンサ ( BMX055 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Si_BMX055_Gyro(
-    char*           str     ///< [in] 文字列
-){
-    SHalSensor_t*   data;
-    SHalSensor_t*   dataX;
-    SHalSensor_t*   dataY;
-    SHalSensor_t*   dataZ;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "x", strlen("x") ) )
-    {
-        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_X );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "y", strlen("y") ) )
-    {
-        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Y );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "z", strlen("z") ) )
-    {
-        data = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        dataX = HalSensorBmx055_GetGyro( EN_SEN_BMX055_X );
-        dataY = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Y );
-        dataZ = HalSensorBmx055_GetGyro( EN_SEN_BMX055_Z );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
-
-        printf( "{ " );
-        printf( "  \"sensor\": \"si_bmx055gyro\"," );
-        printf( "  \"value\": {" );
-        printf( "    \"x\": %f,", dataX->cur );
-        printf( "    \"y\": %f,", dataY->cur );
-        printf( "    \"z\": %f ", dataZ->cur );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
- * @brief     磁気センサ ( BMX055 ) を実行する
- * @attention なし。
- * @note      なし。
- * @sa        なし。
- * @author    Ryoji Morita
- * @return    なし。
- *************************************************************************** */
-static void
-Run_Si_BMX055_Mag(
-    char*           str     ///< [in] 文字列
-){
-    SHalSensor_t*   data;
-    SHalSensor_t*   dataX;
-    SHalSensor_t*   dataY;
-    SHalSensor_t*   dataZ;
-
-    DBG_PRINT_TRACE( "str = %s \n\r", str );
-
-    if( 0 == strncmp( str, "x", strlen("x") ) )
-    {
-        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_X );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "y", strlen("y") ) )
-    {
-        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Y );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "z", strlen("z") ) )
-    {
-        data = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+8.4f", data->cur );
-        printf( "%f", data->cur );
-    } else if( 0 == strncmp( str, "json", strlen("json") ) )
-    {
-        dataX = HalSensorBmx055_GetMag( EN_SEN_BMX055_X );
-        dataY = HalSensorBmx055_GetMag( EN_SEN_BMX055_Y );
-        dataZ = HalSensorBmx055_GetMag( EN_SEN_BMX055_Z );
-
-        AppIfLcd_CursorSet( 0, 1 );
-        AppIfLcd_Printf( "%+5.1f%+5.1f%+5.1f", dataX->cur, dataY->cur, dataZ->cur );
-
-        printf( "{ " );
-        printf( "  \"sensor\": \"si_bmx055mag\"," );
-        printf( "  \"value\": {" );
-        printf( "    \"x\": %f,", dataX->cur );
-        printf( "    \"y\": %f,", dataY->cur );
-        printf( "    \"z\": %f ", dataZ->cur );
-        printf( "  }" );
-        printf( "}" );
-    } else
-    {
-        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", str );
-        goto err;
-    }
-
-err :
-    return;
-}
-
-
-/**************************************************************************//*!
  * @brief     メイン
  * @attention なし。
  * @note      なし。
@@ -578,9 +369,6 @@ int main(int argc, char *argv[ ])
         { "motordc",       required_argument, NULL,  'd' },
         { "led",           required_argument, NULL,  'l' },
         { "sa_pm",         optional_argument, NULL,  'p' },
-        { "si_bmx055acc",  required_argument, NULL,  'x' },
-        { "si_bmx055gyro", required_argument, NULL,  'y' },
-        { "si_bmx055mag",  required_argument, NULL,  'z' },
         { 0,               0,                 NULL,   0  }, // termination
     };
     int longindex = 0;
@@ -629,9 +417,6 @@ int main(int argc, char *argv[ ])
         case 'd': Run_MotorDC( optarg ); break;
         case 'l': Run_Led( optarg ); break;
         case 'p': Run_Sa_Pm( optarg ); break;
-        case 'x': Run_Si_BMX055_Acc( optarg ); break;
-        case 'y': Run_Si_BMX055_Gyro( optarg ); break;
-        case 'z': Run_Si_BMX055_Mag( optarg ); break;
         default:
             DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
             Run_Help();

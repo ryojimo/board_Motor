@@ -86,7 +86,6 @@ Sys_Init(
     HalMotorST_Init();
     HalMotorSV_Init();
     HalPushSw_Init();
-    HalSensorBmx055_Init();
 
     // SENSOR (ADC)
     HalSensorPm_Init();
@@ -118,7 +117,6 @@ Sys_Fini(
     HalMotorST_Fini();
     HalMotorSV_Fini();
     HalPushSw_Fini();
-    HalSensorBmx055_Fini();
 
     // SENSOR (ADC)
     HalSensorPm_Fini();
