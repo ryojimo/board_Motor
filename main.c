@@ -28,7 +28,7 @@
 #include "./sys/sys.h"
 
 
-//#define DBG_PRINT
+#define DBG_PRINT
 #define MY_NAME "MAI"
 #include "./app/log/log.h"
 
@@ -68,6 +68,7 @@ static void         Run_Version( void );
 static void         Run_I2cLcd( int argc, char *argv[] );
 static void         Run_Led( char* str );
 static void         Run_MotorDC( char* str );
+static void         Run_MotorST( int argc, char *argv[] );
 
 static void         Run_Sa_Pm( char* str );
 
@@ -103,6 +104,24 @@ Run_Help(
     printf("\x1b[39m");
     printf( "                                                               \n\r" );
     printf( "  -d number, --motordc=number control the DC motor.            \n\r" );
+
+    printf( "  -e, --motorst               control the STEPPING motor.      \n\r" );
+    printf( "    -d number, --deg=number                                    \n\r" );
+    printf( "                              degree of rotation.              \n\r" );
+    printf( "    -r {left|right}, --rol={left|right}                        \n\r" );
+    printf( "                              direction of rotation.           \n\r" );
+    printf( "                              left  : left direction.          \n\r" );
+    printf( "                              right : right direction.         \n\r" );
+    printf("\x1b[32m");
+    printf( "                              Ex) -e        -d    90  -r    left \n\r" );
+    printf( "                                  --motorst --deg=90  --rol=left \n\r" );
+    printf("\x1b[39m");
+
+
+    printf( "  -e {left|right}, --motorst={left|right}                      \n\r" );
+    printf( "                              control the STEPPING motor.      \n\r" );
+    printf( "                              left  : left rotation.           \n\r" );
+    printf( "                              right : right rotation.          \n\r" );
     printf( "                                                               \n\r" );
     printf( "  -l number, --led=number     control the LED.                 \n\r" );
     printf( "  -p [json], --sa_pm=[json]                                                  \n\r" );
@@ -306,6 +325,77 @@ err :
 
 
 /**************************************************************************//*!
+ * @brief     STEPPING MOTOR を実行する
+ * @attention なし。
+ * @note      なし。
+ * @sa        なし。
+ * @author    Ryoji Morita
+ * @return    なし。
+ *************************************************************************** */
+static void
+Run_MotorST(
+    int             argc,
+    char            *argv[]
+){
+    int             opt = 0;
+    const char      optstring[] = "d:r:";
+    const struct    option longopts[] = {
+      //{ *name,  has_arg,           *flag, val }, // 説明
+        { "rol",  required_argument, NULL,  'r' },
+        { "deg",  required_argument, NULL,  'd' },
+        { 0,      0,                 NULL,   0  }, // termination
+    };
+    int             longindex = 0;
+    int             deg = 0;
+    char            rol[16];
+
+    while( 1 )
+    {
+        opt = getopt_long( argc, argv, optstring, longopts, &longindex );
+        DBG_PRINT_TRACE( "optind = %d \n\r", optind );
+        DBG_PRINT_TRACE( "opt    = %c \n\r", opt );
+
+        if( opt == -1 )   // 処理するオプションが無くなった場合
+        {
+            break;
+        } else if( opt == '?' )  // optstring で指定していない引数が見つかった場合
+        {
+            DBG_PRINT_TRACE( "optopt = %c \n\r", optopt );
+            break;
+        }
+
+        switch( opt )
+        {
+        case 'd': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); deg = strtol( (const char*)optarg, NULL, 10 ); break;
+        case 'r': DBG_PRINT_TRACE( "optarg = %s \n\r", optarg ); strncpy( rol, (const char*)optarg, 16 ); break;
+        default:
+            DBG_PRINT_ERROR( "invalid command/option. : \"%s\" \n\r", argv[1] );
+            Run_Help();
+        break;
+        }
+    }
+
+    DBG_PRINT_TRACE( "deg = %d \n\r", deg );
+    DBG_PRINT_TRACE( "rol = %s \n\r", rol );
+
+    if( 0 == strncmp( rol, "left", strlen("left") ) )
+    {
+        HalMotorST_SetPosition( EN_LEFT, deg );
+    } else if( 0 == strncmp( rol, "right", strlen("right") ) )
+    {
+        HalMotorST_SetPosition( EN_RIGHT, deg );
+    } else
+    {
+        DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", rol );
+        goto err;
+    }
+
+err :
+    return;
+}
+
+
+/**************************************************************************//*!
  * @brief     ポテンショメーターを実行する
  * @attention なし。
  * @note      なし。
@@ -360,13 +450,14 @@ err :
 int main(int argc, char *argv[ ])
 {
     int             opt = 0;
-    const char      optstring[] = "hvc:d:l:p::x:y:z:";
+    const char      optstring[] = "hvc:d:e:l:p::x:y:z:";
     const struct    option longopts[] = {
       //{ *name,           has_arg,           *flag, val }, // 説明
         { "help",          no_argument,       NULL,  'h' },
         { "version",       no_argument,       NULL,  'v' },
         { "i2clcd",        required_argument, NULL,  'c' },
         { "motordc",       required_argument, NULL,  'd' },
+        { "motorst",       required_argument, NULL,  'e' },
         { "led",           required_argument, NULL,  'l' },
         { "sa_pm",         optional_argument, NULL,  'p' },
         { 0,               0,                 NULL,   0  }, // termination
@@ -407,6 +498,13 @@ int main(int argc, char *argv[ ])
             argc = argc - optind;
             argv = argv + optind;
             Run_I2cLcd( argc, argv );
+            break;
+        } else if( opt == 'e' )
+        {
+            optind = 1;
+            argc = argc - optind;
+            argv = argv + optind;
+            Run_MotorST( argc, argv );
             break;
         }
 

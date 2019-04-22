@@ -3,7 +3,7 @@
  *  @brief          [HAL] ステッピングモータ・モータ・ドライバ API を定義したファイル。
  *  @author         Ryoji Morita
  *  @attention      none.
- *  @sa             none.
+ *  @sa             http://fum125.hatenablog.com/entry/2018/06/26/221558
  *  @bug            none.
  *  @warning        none.
  *  @version        1.00
@@ -22,7 +22,7 @@
 #include "hal_cmn.h"
 #include "hal.h"
 
-//#define DBG_PRINT
+#define DBG_PRINT
 #define MY_NAME "HAL"
 #include "../app/log/log.h"
 
@@ -33,7 +33,13 @@
 #define MOTOR_ST_A1        (22)
 #define MOTOR_ST_A2        (27)
 #define MOTOR_ST_B1        (17)
-#define MOTOR_ST_B1        (4)
+#define MOTOR_ST_B2        (4)
+
+// AOR = Angle Of Rotation
+// PULSE = 1 PULSE で 0.17578125°回転。
+#define ANGLE_MIN               (1.8)       ///< @def :  指定可能な最小の回転角度
+#define PULSE_ANGLE_360         (200)       ///< @def : 360°回転するパルス数 ( 360 / 1.8 = 200 )
+#define PULSE_ERROR             (1)         ///< @def : 誤差
 
 
 //********************************************************
@@ -130,6 +136,8 @@ HalMotorST_Init(
         return ret;
     }
 
+    digitalWrite( MOTOR_ST_A2, EN_HIGH );
+    digitalWrite( MOTOR_ST_B2, EN_HIGH );
     ret = EN_TRUE;
     return ret;
 }
@@ -164,17 +172,22 @@ static void
 StepCw(
     void  ///< [in] ナシ
 ){
-    digitalWrite( MOTOR_ST_A2, EN_HIGH );
-    digitalWrite( MOTOR_ST_B2, EN_HIGH );
-
+//    DBG_PRINT_TRACE( "\n\r" );
     digitalWrite( MOTOR_ST_A1, EN_HIGH );
-    sleep( 0.01 );
-    digitalWrite( MOTOR_ST_B1, EN_HIGH );
-    sleep( 0.01 );
+    usleep( 5 * 1000 );
     digitalWrite( MOTOR_ST_A1, EN_LOW );
-    sleep( 0.01 );
+
+    digitalWrite( MOTOR_ST_B1, EN_HIGH );
+    usleep( 5 * 1000 );
     digitalWrite( MOTOR_ST_B1, EN_LOW );
-    sleep( 0.01 );
+
+    digitalWrite( MOTOR_ST_A2, EN_HIGH );
+    usleep( 5 * 1000 );
+    digitalWrite( MOTOR_ST_A2, EN_LOW );
+
+    digitalWrite( MOTOR_ST_B2, EN_HIGH );
+    usleep( 5 * 1000 );
+    digitalWrite( MOTOR_ST_B2, EN_LOW );
     return;
 }
 
@@ -191,17 +204,22 @@ static void
 StepCcw(
     void  ///< [in] ナシ
 ){
-    digitalWrite( MOTOR_ST_A2, EN_HIGH );
+//    DBG_PRINT_TRACE( "\n\r" );
     digitalWrite( MOTOR_ST_B2, EN_HIGH );
+    usleep( 5 * 1000 );
+    digitalWrite( MOTOR_ST_B2, EN_LOW );
+
+    digitalWrite( MOTOR_ST_A2, EN_HIGH );
+    usleep( 5 * 1000 );
+    digitalWrite( MOTOR_ST_A2, EN_LOW );
 
     digitalWrite( MOTOR_ST_B1, EN_HIGH );
-    sleep( 0.01 );
-    digitalWrite( MOTOR_ST_A1, EN_HIGH );
-    sleep( 0.01 );
+    usleep( 5 * 1000 );
     digitalWrite( MOTOR_ST_B1, EN_LOW );
-    sleep( 0.01 );
+
+    digitalWrite( MOTOR_ST_A1, EN_HIGH );
+    usleep( 5 * 1000 );
     digitalWrite( MOTOR_ST_A1, EN_LOW );
-    sleep( 0.01 );
     return;
 }
 
@@ -214,12 +232,37 @@ StepCcw(
  * @return    なし。
  *************************************************************************** */
 void
-SetPosition(
-    void  ///< [in] ナシ
+HalMotorST_SetPosition(
+    EHalDirection_t   dir,    ///< [in] 回転方向
+    unsigned int      deg     ///< [in] 回転角度
 ){
-    while( 1 )
+    static  int       cnt = 1;    // 回転角度の誤差を修正するためのカウンタ
+                                  // この関数が 3 回呼ばれるたびに value の値を + PULSE_ERROR して回転角度の誤差を正す
+    unsigned int      value = 0;
+
+    DBG_PRINT_TRACE( "dir = %d \n\r", dir );
+    DBG_PRINT_TRACE( "deg = %d \n\r", deg );
+
+    value = PULSE_ANGLE_360 * deg / 360 / 4;
+
+    cnt = ( cnt + 1 ) % 3;
+    if( cnt == 0 )
     {
-        StepCcw();
+        value += PULSE_ERROR;
+    }
+
+    if( dir == EN_LEFT )
+    {
+        while( value-- )
+        {
+            StepCcw();
+        }
+    } else if( dir == EN_RIGHT )
+    {
+        while( value-- )
+        {
+            StepCw();
+        }
     }
     return;
 }
