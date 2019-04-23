@@ -28,7 +28,7 @@
 #include "./sys/sys.h"
 
 
-#define DBG_PRINT
+//#define DBG_PRINT
 #define MY_NAME "MAI"
 #include "./app/log/log.h"
 
@@ -113,8 +113,8 @@ Run_Help(
     printf( "                              ccw : left direction.            \n\r" );
     printf( "                              cw  : right direction.           \n\r" );
     printf("\x1b[32m");
-    printf( "                              Ex) -e        -d    90  -r    left \n\r" );
-    printf( "                                  --motorst --deg=90  --rol=left \n\r" );
+    printf( "                              Ex) -e        -d    90  -r    cw \n\r" );
+    printf( "                                  --motorst --deg=90  --rol=cw \n\r" );
     printf("\x1b[39m");
 
 

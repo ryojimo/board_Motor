@@ -23,7 +23,7 @@
 #include "hal.h"
 
 
-#define DBG_PRINT
+//#define DBG_PRINT
 #define MY_NAME "HAL"
 #include "../app/log/log.h"
 
