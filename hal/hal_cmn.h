@@ -63,13 +63,6 @@ typedef enum tagEHalState
 } EHalState_t;
 
 
-typedef enum tagEHalDirection
-{
-    EN_LEFT = 0,            ///< @var : 左回転
-    EN_RIGHT = 1            ///< @var : 右回転
-} EHalDirection_t;
-
-
 //*************************************
 // デバイスを区別するための型
 //*************************************

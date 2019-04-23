@@ -108,10 +108,10 @@ Run_Help(
     printf( "  -e, --motorst               control the STEPPING motor.      \n\r" );
     printf( "    -d number, --deg=number                                    \n\r" );
     printf( "                              degree of rotation.              \n\r" );
-    printf( "    -r {left|right}, --rol={left|right}                        \n\r" );
+    printf( "    -r {ccw|cw}, --rol={ccw|cw}                                \n\r" );
     printf( "                              direction of rotation.           \n\r" );
-    printf( "                              left  : left direction.          \n\r" );
-    printf( "                              right : right direction.         \n\r" );
+    printf( "                              ccw : left direction.            \n\r" );
+    printf( "                              cw  : right direction.           \n\r" );
     printf("\x1b[32m");
     printf( "                              Ex) -e        -d    90  -r    left \n\r" );
     printf( "                                  --motorst --deg=90  --rol=left \n\r" );
@@ -378,12 +378,12 @@ Run_MotorST(
     DBG_PRINT_TRACE( "deg = %d \n\r", deg );
     DBG_PRINT_TRACE( "rol = %s \n\r", rol );
 
-    if( 0 == strncmp( rol, "left", strlen("left") ) )
+    if( 0 == strncmp( rol, "ccw", strlen("ccw") ) )
     {
-        HalMotorST_SetPosition( EN_LEFT, deg );
-    } else if( 0 == strncmp( rol, "right", strlen("right") ) )
+        HalMotorST_SetPosition( EN_MOTOR_CCW, deg );
+    } else if( 0 == strncmp( rol, "cw", strlen("cw") ) )
     {
-        HalMotorST_SetPosition( EN_RIGHT, deg );
+        HalMotorST_SetPosition( EN_MOTOR_CW, deg );
     } else
     {
         DBG_PRINT_ERROR( "invalid argument error. : %s \n\r", rol );

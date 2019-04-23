@@ -143,7 +143,7 @@ void            HalMotorDC2_SetPwmDuty( EHalMotorState_t status, int rate );
 // ステッピングモータ API
 EHalBool_t      HalMotorST_Init( void );
 void            HalMotorST_Fini( void );
-void            HalMotorST_SetPosition( EHalDirection_t dir, unsigned int deg );
+void            HalMotorST_SetPosition( EHalMotorState_t status, int deg );
 
 // サーボモータ API
 EHalBool_t      HalMotorSV_Init( void );
