@@ -109,6 +109,9 @@ HalMotorDC_Init(
 ){
     EHalBool_t      ret = EN_FALSE;
 
+    unsigned int        clock = 3840;
+    unsigned int        cnt = 100;
+
     DBG_PRINT_TRACE( "\n\r" );
 
     InitParam();
@@ -120,6 +123,12 @@ HalMotorDC_Init(
     }
 
     HalMotorDC_SetPwmDuty( EN_MOTOR_STOP, 0 );
+
+    pinMode( MOTOR_OUT, PWM_OUTPUT );
+    pwmSetMode( PWM_MODE_MS );
+    pwmSetClock( clock );
+    pwmSetRange( cnt );
+
     ret = EN_TRUE;
     return ret;
 }
@@ -158,8 +167,6 @@ HalMotorDC_SetPwmDuty(
     int                 rate    ///< [in] デューティ比 : 0% ～ 100% まで
 ){
     unsigned int        value = 0;
-    unsigned int        clock = 3840;
-    unsigned int        cnt = 100;
 
     DBG_PRINT_TRACE( "status = %d \n\r", status );
     DBG_PRINT_TRACE( "rate   = %d%% \n\r", rate );
@@ -171,27 +178,12 @@ HalMotorDC_SetPwmDuty(
     {
         pinMode( MOTOR_OUT, OUTPUT );
         digitalWrite( MOTOR_OUT, EN_LOW );
-    } else if( status == EN_MOTOR_BRAKE )
+    } else if( status == EN_MOTOR_BRAKE || status == EN_MOTOR_STOP )
     {
-        pinMode( MOTOR_OUT, PWM_OUTPUT );
-        pwmSetMode( PWM_MODE_MS );
-        pwmSetClock( clock );
-        pwmSetRange( cnt );
         pwmWrite( MOTOR_OUT, 0 );
     } else if( status == EN_MOTOR_CCW || status == EN_MOTOR_CW )
     {
-        pinMode( MOTOR_OUT, PWM_OUTPUT );
-        pwmSetMode( PWM_MODE_MS );
-        pwmSetClock( clock );
-        pwmSetRange( cnt );
         pwmWrite( MOTOR_OUT, value );
-    } else if( status == EN_MOTOR_STOP )
-    {
-        pinMode( MOTOR_OUT, PWM_OUTPUT );
-        pwmSetMode( PWM_MODE_MS );
-        pwmSetClock( clock );
-        pwmSetRange( cnt );
-        pwmWrite( MOTOR_OUT, 0 );
     } else
     {
         ;

@@ -104,7 +104,6 @@ Run_Help(
     printf("\x1b[39m");
     printf( "                                                               \n\r" );
     printf( "  -d number, --motordc=number control the DC motor.            \n\r" );
-
     printf( "  -e, --motorst               control the STEPPING motor.      \n\r" );
     printf( "    -d number, --deg=number                                    \n\r" );
     printf( "                              degree of rotation.              \n\r" );
@@ -116,12 +115,6 @@ Run_Help(
     printf( "                              Ex) -e        -d    90  -r    cw \n\r" );
     printf( "                                  --motorst --deg=90  --rol=cw \n\r" );
     printf("\x1b[39m");
-
-
-    printf( "  -e {left|right}, --motorst={left|right}                      \n\r" );
-    printf( "                              control the STEPPING motor.      \n\r" );
-    printf( "                              left  : left rotation.           \n\r" );
-    printf( "                              right : right rotation.          \n\r" );
     printf( "                                                               \n\r" );
     printf( "  -l number, --led=number     control the LED.                 \n\r" );
     printf( "  -p [json], --sa_pm=[json]                                                  \n\r" );
@@ -265,8 +258,7 @@ Run_MotorDC(
 ){
     int             data = 0;
     SHalSensor_t*   value;
-    EHalBool_t      flag = EN_FALSE;
-
+    int             p_rate = 0;
 
     DBG_PRINT_TRACE( "str = %s \n\r", str );
 
@@ -276,6 +268,9 @@ Run_MotorDC(
         HalMotorDC2_SetPwmDuty( EN_MOTOR_STANDBY, 0 );
     } else if( 0 == strncmp( str, "pm", strlen("pm") ) )
     {
+        value = HalSensorPm_Get();
+        p_rate = value->cur_rate;
+
         while( EN_FALSE == HalPushSw_Get( EN_PUSH_SW_0 ) )
         {
             value = HalSensorPm_Get();
@@ -284,23 +279,13 @@ Run_MotorDC(
             AppIfLcd_CursorSet( 0, 1 );
             AppIfLcd_Printf( "%3d%%", value->cur_rate );
 
-            // SW1 が押されたら、MotorDC  の PWM Duty を変更する
-            // SW2 が押されたら、MotorDC2 の PWM Duty を変更する
-            if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_1 ) )
-            {
-                flag = EN_TRUE;
-            } else if( EN_TRUE == HalPushSw_Get( EN_PUSH_SW_2 ) )
-            {
-                flag = EN_FALSE;
-            }
-
-            if( flag == EN_TRUE )
+            if( value->cur_rate != p_rate )
             {
                 HalMotorDC_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
-            } else
-            {
                 HalMotorDC2_SetPwmDuty( EN_MOTOR_CW, value->cur_rate );
+                p_rate = value->cur_rate;
             }
+            usleep( 10 * 1000 );
         }
 
         HalMotorDC_SetPwmDuty( EN_MOTOR_STOP, 0 );
